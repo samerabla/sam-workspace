@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Diplomata&display=swap');
+@import "tailwindcss";
+
+@source "../../sam_ui";
+
+
+@theme {
+    --color-amber-*: initial;
+    --color-sam: #ba0d52;
+    --color-primary: #fcba03;
+
+    --font-deplomata: "Diplomata", sans-serif; 
+}
+
+/* html {
+  overflow-x: scroll;
+} */
+
+@utility center {
+    @apply flex justify-center items-center
+}
+
+@utility input {
+    @apply w-full h-full rounded-full px-4 py-2 border border-gray-300 
+    bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500
+}
+
+@utility btn {
+    @apply px-8 py-2 bg-primary text-white font-medium rounded-full shadow-md
+}
+
+.btn:hover {
+    @apply bg-white text-primary ring ring-primary
+}
+
+@utility btn-sec {
+    @apply btn bg-white text-primary ring ring-primary
+}
+
+.btn-sec:hover {
+    @apply bg-primary text-white
+}
+
+@utility btn-err {
+    @apply btn bg-red-600
+}
+
+.btn-error:hover {
+@apply  bg-red-700
+}
+
+@utility btn-success {
+    @apply btn bg-green-600
+}
+
+.btn-success:hover {
+@apply  bg-green-700
+}
+
+@utility sam-shadow {
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+@utility sam-shadow-red {
+    box-shadow: rgba(255, 0, 0, 0.3) 0px 19px 38px, rgba(255, 0, 0, 0.22) 0px 15px 12px;
+}
+
+@utility sam-shadow-green {
+    box-shadow: rgba(0, 255, 0, 0.3) 0px 19px 38px, rgba(0, 255, 0, 0.22) 0px 15px 12px;
+}
+
+
+
+/* @layer base {
+    div {
+        background: red;
+        color: white;
+    }
+} */

@@ -1,0 +1,24 @@
+[package]
+name = "sam_frontend"
+version = "0.1.0"
+authors = ["samerabla <samerfamilie@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dioxus = { version = "0.6.0", features = ["router"] }
+reqwest = {version = "0.12.15", features = ["json","cookies"]}
+serde_json = "1.0.140"
+gloo-net = "0.5"
+web-sys = {workspace = true}
+
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
+
+[serve]
+proxy = "http://127.0.0.1:3000"

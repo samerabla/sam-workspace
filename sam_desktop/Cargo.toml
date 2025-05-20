@@ -1,0 +1,9 @@
+[package]
+name = "sam_desktop"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dioxus = {workspace = true}
+dioxus-ssr = {workspace = true}
+headless_chrome = {workspace = true}

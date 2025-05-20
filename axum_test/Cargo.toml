@@ -1,0 +1,36 @@
+[package]
+name = "axum_test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sam_util = { workspace = true, features = ["gmail"]}
+sam_error = { workspace = true}
+sam_proc_macros.workspace = true
+axum = { workspace = true, features = ["macros"] }
+axum-extra = { version = "0.10.0", features = ["cookie"] }
+tower-http = { version = "0.6.2", features = ["catch-panic", "trace", "fs","cors"] }
+http = "1.3.1"
+hyper = { version = "1.6.0", features = ["client","http1"] }
+
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = { version = "1.0.138", features = ["std"] }
+tokio = { version = "1.43.0", features = ["full"] }
+sqlx = { workspace = true, features = ["postgres","runtime-tokio-native-tls","uuid","time"] }
+user-agent-parser = "0.3.6"
+argon2 = "0.5.3"
+rand.workspace = true
+dotenvy = "0.15.7"
+uuid = { version = "1.13.1", features = ["v4"] }
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tracing = "0.1.41"
+tracing-error = "0.2.1"
+time = { version = "0.3.37", features = ["macros"] }
+jsonwebtoken = "9.3.1"
+dioxus = { workspace = true, features = ["router"] }
+dioxus-ssr.workspace = true
+
+
+
+[serve]
+proxy = "http://127.0.0.1:3000"

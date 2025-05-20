@@ -1,0 +1,40 @@
+# Rust Workspace Ignore Rules
+
+/auth
+# Ignore ALL target directories recursively
+**/target/
+
+# Ignore Rust backup files
+**/*.rs.bk
+
+# Keep only the root Cargo.lock
+!/Cargo.lock
+**/Cargo.lock
+
+# IDE configurations
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+**/*.exe
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.lib
+**/*.a
+**/*.pdb
+
+# Documentation
+**/doc/
+**/docs/
+
+# Environment files
+.env
+.env.*
+!.env.example

@@ -1,0 +1,8 @@
+[package]
+name = "learning"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+winapi = { version = "0.3", features = ["winuser", "fileapi", "winbase", "ioapiset", "winioctl"] }
+widestring = "0.5" # For handling wide strings

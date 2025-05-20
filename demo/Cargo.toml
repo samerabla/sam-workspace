@@ -1,0 +1,17 @@
+[package]
+name = "demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7"
+dioxus = { version = "0.6.0", features = ["router"] }
+dioxus-ssr = { version = "*" }
+tokio = { version = "1.15.0", features = ["full"] }
+tower-http = { version = "0.6.2", features = ["cors"] }
+
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["client", "http1", "tokio"] }
+http-body-util = "0.1"
+
+

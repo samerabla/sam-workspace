@@ -1,0 +1,9 @@
+[package]
+name = "sam_error"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { workspace = true }
+thiserror = { workspace = true }
+sqlx = { workspace = true, features = ["postgres","runtime-tokio-native-tls","uuid","time"] }

@@ -1,0 +1,90 @@
+:root {
+    --color: rgb(195, 182, 37);
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+}
+
+#hero {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#links {
+    width: 400px;
+    text-align: left;
+    font-size: x-large;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+#links a {
+    color: white;
+    text-decoration: none;
+    margin-top: 20px;
+    margin: 10px 0px;
+    border: white 1px solid;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#links a:hover {
+    background-color: #1f1f1f;
+    cursor: pointer;
+}
+
+#header {
+    max-width: 1200px;
+}
+
+
+.inito {
+    transform:translateX(100%);
+  }
+  
+  @keyframes b {
+    0% {
+      transform:translateX(100vw);
+    } 
+      
+  
+    100% {
+      transform:translateX(0);
+    }
+  }
+  .b {
+    animation-name: b;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    
+  }
+  
+ 
+  .test21 {
+    background-color: gray;
+  }
+
+  @keyframes test1 {
+    0% {
+      /* transform:translateY(100%); */
+      top:300px;
+    }
+  
+  
+    100% {
+      /* transform:translateY(0); */
+      top:82px;
+    }
+  }
+  .test1 {
+    position: absolute;
+    animation-name: test1;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    
+  }

@@ -1,0 +1,13 @@
+[package]
+name = "sam_icon"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dioxus-free-icons = { version = "0.9", optional = true }
+
+
+[features]
+default = ["lucide"]
+ionicons = ["dioxus-free-icons/ionicons"]
+lucide = ["dioxus-free-icons/lucide"]

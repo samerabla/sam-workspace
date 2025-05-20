@@ -1,0 +1,4 @@
+[tasks.start-frontend]
+command = "dx"
+args = ["serve","--port","9000"]
+cwd = "./base/run_frontend/"

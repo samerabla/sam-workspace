@@ -1,0 +1,24 @@
+[package]
+name = "test2"
+version = "0.1.0"
+authors = ["rasheed-abla <rasheedabla08@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dioxus = { workspace = true, features = ["router"] }
+dioxus-web = { workspace = true }
+sam_ui = {path = "../sam_ui"}
+sam_util = {path = "../sam_util"}
+wasm-bindgen = { workspace = true }
+web-sys = { workspace = true, features = ["HtmlDivElement","Event","CssStyleDeclaration","HtmlElement"] }
+
+dioxus-sdk = { workspace = true, features = ["window_size"] }
+dioxus-motion = "0.2.3"
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
