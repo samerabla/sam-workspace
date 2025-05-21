@@ -13,6 +13,7 @@ pub use jwt::Claims;
 mod auth;
 mod cookie;
 mod jwt;
+mod login_with_google;
 mod password;
 mod user_db;
 mod user_emails;

@@ -36,6 +36,14 @@ pub fn user_routes(state: AppState) -> Router<AppState> {
         .route("/users/test", get(|| async { "Hello" }))
         .route("/users/add", post(add_user_handler))
         .route("/users/login", post(login_user_handler))
+        .route(
+            "/users/login/google",
+            get(move || super::login_with_google::handler()),
+        )
+        .route(
+            "/users/login/google/callback",
+            get(super::login_with_google::callback),
+        )
         .route("/users/logout", post(logout_user_handler))
         .route("/users/verify-email", get(verify_email_handler))
         .route(

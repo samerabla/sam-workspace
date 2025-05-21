@@ -58,7 +58,7 @@ async fn main() -> Result<(), SamError> {
         HeaderValue::from_static("http://127.0.0.1:9000"),
     ];
 
-    let layer = CorsLayer::new()
+    let cors_layer = CorsLayer::new()
         // .allow_origin("http://127.0.0.1:9000".parse::<HeaderValue>().unwrap())
         .allow_origin(AllowOrigin::predicate(move |origin, _| {
             allowed_origins.contains(origin)
@@ -71,11 +71,19 @@ async fn main() -> Result<(), SamError> {
     let app = Router::new()
         .route("/", get(app_endpoint))
         .nest_service("/assets", ServeDir::new("assets"))
-        .route("/foo", get(handler_1)
-        .route_layer(middleware::from_fn_with_state(state.clone(),auth_middleware))
-    )
+        .route(
+            "/foo",
+            get(handler_1).route_layer(middleware::from_fn_with_state(
+                state.clone(),
+                auth_middleware,
+            )),
+        )
+        .route("/internal-error", get(internal_err_handler))
         .merge(user_routes(state.clone()))
-        .layer(middleware::from_fn_with_state(state.clone(), error_middleware))
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            error_middleware,
+        ))
         .layer(CatchPanicLayer::custom({
             let pool = state.pool.clone();
             move |error: Box<dyn Any + Send>| {
@@ -93,10 +101,9 @@ async fn main() -> Result<(), SamError> {
                 Response::new("An error occurred".to_string())
             }
         }))
-        .layer(layer)
-        .with_state(state)
-        //.fallback(fallback_handler)
-        ;
+        .layer(cors_layer)
+        .with_state(state);
+    //.fallback(fallback_handler)
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     println!("Listening on port 3000 ...");
@@ -152,6 +159,10 @@ async fn handler_1(request: Request) -> String {
     //     .unwrap();
     format!("successooo....")
     //format!("b: {:?} ", info)
+}
+
+async fn internal_err_handler() -> String {
+    "Internal Erro".to_string()
 }
 
 async fn fallback_handler(request: Request) -> Response {

@@ -4,8 +4,8 @@ use sam_util::gmail::{send, GmailConfig};
 use crate::error::Result;
 
 pub fn generate_verify_email_body(verification_token: String) -> Result<String> {
-    let host = dotenvy::var("HOST")
-        .map_err(|_| SamError::MissingEnviromentVariable("HOST".to_string()))?;
+    let host = dotenvy::var("DEV_HOST")
+        .map_err(|_| SamError::MissingEnviromentVariable("DEV_HOST".to_string()))?;
     let body = format!(
         r#"
         <a href="{}/users/verify-email?token={}">verify your email</a>
@@ -16,8 +16,8 @@ pub fn generate_verify_email_body(verification_token: String) -> Result<String> 
 }
 
 pub fn generate_forgot_password_body(verification_token: String) -> Result<String> {
-    let host = dotenvy::var("HOST")
-        .map_err(|_| SamError::MissingEnviromentVariable("HOST".to_string()))?;
+    let host = dotenvy::var("DEV_HOST")
+        .map_err(|_| SamError::MissingEnviromentVariable("DEV_HOST".to_string()))?;
     let body = format!(
         r#"
         <a href="{}/users/reset-password?token={}">Request a new password</a>
