@@ -13,7 +13,7 @@ use super::{
     user_emails::{
         generate_forgot_password_body, generate_verify_email_body, send_verification_email,
     },
-    AddUser, Claims, LoginUser,
+    LoginUser, Claims, LoginUser,
 };
 use crate::{error::Result, response::UserResponse, AppState};
 use axum::{
@@ -45,7 +45,7 @@ pub fn user_routes(state: AppState) -> Router<AppState> {
 
 async fn add_user_handler(
     State(state): State<AppState>,
-    user: Result<Json<AddUser>, JsonRejection>,
+    user: Result<Json<LoginUser>, JsonRejection>,
 ) -> Result<Response> {
     // let user = user?.0.hash()?;
     let user = user?.0;

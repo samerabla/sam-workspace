@@ -74,6 +74,8 @@ pub async fn handler() -> Redirect {
                 .add_scope(oauth2::Scope::new("profile".to_string()))
                 //.set_pkce_challenge(pkce_challenge)
                 .url();
+            println!("auth_url: {}", auth_url);
+            println!("CsrfToken: {:#?}", _csrf_token);
             Redirect::to(auth_url.as_str())
         }
         Err(e) => {
@@ -91,23 +93,19 @@ pub async fn callback(Query(params): Query<HashMap<String, String>>) -> Html<Str
         Ok(client) => {
             let http_client = reqwest::ClientBuilder::new()
                 // Following redirects opens the client up to SSRF vulnerabilities.
+                // This prevents redirects
                 .redirect(reqwest::redirect::Policy::none())
                 .build()
                 .expect("Client should build");
 
             // Now you can trade it for an access token.
+            // Send a request with the code and the pkce verifier to get a token
             let token_result = client
                 .exchange_code(AuthorizationCode::new(params.get("code").unwrap().clone()))
                 // Set the PKCE code verifier.
                 //.set_pkce_verifier(pkce_verifier)
                 .request_async(&http_client)
                 .await;
-
-            // let token_result = client
-            //     .exchange_code(AuthorizationCode::new(*params.get("code").unwrap()))
-            //     //.set_pkce_verifier(pkce_code_verifier)
-            //     .request(&http_client)
-            //     .unwrap();
             match token_result {
                 Ok(token) => {
                     use oauth2::TokenResponse;

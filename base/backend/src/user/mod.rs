@@ -20,22 +20,16 @@ mod user_emails;
 mod user_routes;
 
 #[derive(Debug, Clone, Deserialize)]
-struct AddUser {
+struct LoginUser {
     email: String,
     password: String,
 }
 
-impl AddUser {
+impl LoginUser {
     pub fn hash(mut self) -> Result<Self> {
         self.password = hash_password(self.password.as_str())?;
         Ok(self)
     }
-}
-
-#[derive(Debug, Clone, Deserialize)]
-struct LoginUser {
-    email: String,
-    password: String,
 }
 
 #[derive(Debug, FromRow)]

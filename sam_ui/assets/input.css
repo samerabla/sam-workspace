@@ -1,0 +1,83 @@
+/* @utility input-border {
+@apply border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500;
+} */
+@utility input-border {
+  @apply ring-1 ring-gray-500;
+  &:focus-within {
+    @apply outline-none ring-1 ring-blue-500;
+  }
+}
+
+@utility input {
+  @apply w-full h-full px-4 py-2 text-gray-800 text-sm placeholder-shown:text-gray-400 placeholder-shown:text-ellipsis truncate;
+}
+
+@utility input-padding {
+  @apply pl-11;
+}
+
+@utility input-square {
+  @apply rounded-sm;
+}
+
+@utility input-rounded {
+  @apply rounded-full;
+}
+
+@utility input-line {
+  @apply border-b border-b-gray-500 focus:border-b-2 focus:border-b-primary-500;
+  &:focus-within {
+    @apply outline-none border-b-2 border-b-primary-500;
+  }
+}
+
+@utility input-suffix {
+  @apply absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-800 text-sm transition-all duration-300 ease-in-out cursor-pointer;
+}
+
+@utility input-prefix {
+  @apply absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-800 text-sm cursor-pointer;
+}
+
+.input-line {
+  .input-prefix {
+    @apply left-0;
+  }
+  .input-padding {
+    @apply pl-8;
+  }
+  .animated-label {
+    @apply pl-5;
+  }
+}
+
+@utility animated-label {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm transition-all duration-300 ease-in-out truncate w-fit max-w-full cursor-text pr-8;
+}
+
+@utility label {
+  @apply absolute left-0 -top-1 transform -translate-y-6 text-sm truncate w-fit max-w-full pr-8;
+}
+
+@utility label-padding {
+  @apply pl-8;
+}
+
+.input:focus + .animated-label,
+.input:not(:placeholder-shown) + .animated-label {
+  @apply top-[-1px] text-xs text-gray-800 bg-white px-1;
+}
+
+.input-line:focus-within .animated-label,
+.input-line .input:not(:placeholder-shown) + .animated-label {
+  @apply pl-0 -top-1 left-0 text-gray-800;
+}
+
+/* .input:focus.input-line + .animated-label,
+.input:not(:placeholder-shown).input-line + .animated-label {
+  @apply pl-0 -top-1 left-0;
+} */
+
+.input:not(:focus) + .animated-label {
+  @apply text-gray-400;
+}

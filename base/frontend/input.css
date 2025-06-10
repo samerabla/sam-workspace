@@ -1,79 +1,135 @@
-@import url('https://fonts.googleapis.com/css2?family=Diplomata&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Diplomata&display=swap");
 @import "tailwindcss";
 
+@import "../../sam_ui/assets/main.css";
 @source "../../sam_ui";
 
-
 @theme {
-    --color-amber-*: initial;
-    --color-sam: #ba0d52;
-    --color-primary: #fcba03;
+  --color-amber-*: initial;
+  --color-sam: #ba0d52;
+  /* Primary color pallete */
+  --color-primary-50: #eef0fe;
+  --color-primary-100: #d3d7fc;
+  --color-primary-200: #aeb3f9;
+  --color-primary-300: #858cf5;
+  --color-primary-400: #5e66f1;
+  --color-primary-500: #2f3ad3;
+  --color-primary-600: #232bb2;
+  --color-primary-700: #1a218f;
+  --color-primary-800: #12186b;
+  --color-primary-900: #0b1051;
 
-    --font-deplomata: "Diplomata", sans-serif; 
+  /* Green Color */
+  --color-green-50: #e6f6ef;
+  --color-green-100: #c0e8d4;
+  --color-green-200: #97dab8;
+  --color-green-300: #6ecb9c;
+  --color-green-400: #47be83;
+  --color-green-500: #198754;
+  --color-green-600: #126c44;
+  --color-green-700: #0b5134;
+  --color-green-800: #053723;
+  --color-green-900: #012314;
+
+  /* Red Color */
+  --color-red-50: #fdeced;
+  --color-red-100: #fac7c9;
+  --color-red-200: #f49c9f;
+  --color-red-300: #ee6f74;
+  --color-red-400: #e94752;
+  --color-red-500: #dc3545;
+  --color-red-600: #b52836;
+  --color-red-700: #8e1d29;
+  --color-red-800: #66131b;
+  --color-red-900: #430c12;
+
+  --font-deplomata: "Diplomata", sans-serif;
 }
 
 /* html {
   overflow-x: scroll;
 } */
 
-@utility center {
-    @apply flex justify-center items-center
+*:focus-visible {
+    outline: none;
 }
 
-@utility input {
-    @apply w-full h-full rounded-full px-4 py-2 border border-gray-300 
-    bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500
+@utility center {
+  @apply flex justify-center items-center;
 }
+
+
 
 @utility btn {
-    @apply px-8 py-2 bg-primary text-white font-medium rounded-full shadow-md
+  @apply px-8 py-2 bg-primary-500 text-white font-medium rounded-md w-full min-w-fit shadow-md border border-primary-500;
 }
 
 .btn:hover {
-    @apply bg-white text-primary ring ring-primary
+  @apply bg-primary-700;
 }
 
+/* .btn:hover {
+    @apply bg-white text-primary border border-primary
+} */
+
 @utility btn-sec {
-    @apply btn bg-white text-primary ring ring-primary
+  @apply btn bg-white text-primary-500;
 }
 
 .btn-sec:hover {
-    @apply bg-primary text-white
+  @apply bg-primary-50 text-primary-500;
 }
 
 @utility btn-err {
-    @apply btn bg-red-600
+  @apply btn bg-red-500;
 }
 
-.btn-error:hover {
-@apply  bg-red-700
+.btn-err:hover {
+  @apply bg-red-700;
 }
 
 @utility btn-success {
-    @apply btn bg-green-600
+  @apply btn bg-green-500;
 }
 
 .btn-success:hover {
-@apply  bg-green-700
+  @apply bg-green-700;
 }
 
 @utility sam-shadow {
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
 @utility sam-shadow-red {
-    box-shadow: rgba(255, 0, 0, 0.3) 0px 19px 38px, rgba(255, 0, 0, 0.22) 0px 15px 12px;
+  box-shadow: rgba(255, 0, 0, 0.3) 0px 19px 38px,
+    rgba(255, 0, 0, 0.22) 0px 15px 12px;
 }
 
 @utility sam-shadow-green {
-    box-shadow: rgba(0, 255, 0, 0.3) 0px 19px 38px, rgba(0, 255, 0, 0.22) 0px 15px 12px;
+  box-shadow: rgba(0, 255, 0, 0.3) 0px 19px 38px,
+    rgba(0, 255, 0, 0.22) 0px 15px 12px;
 }
-
-
 
 /* @layer base {
     div {
         background: red;
         color: white;
     }
+} */
+
+
+
+/* 
+@utility input {
+  @apply w-full h-full px-4 py-2 border border-gray-300 
+    bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500;
+}
+
+@utility input-rounded {
+  @apply rounded-full;
+}
+
+@utility input-square {
+  @apply rounded-lg;
 } */

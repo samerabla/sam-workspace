@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AddUser {
+pub struct LoginUser {
     pub email: String,
     pub password: String,
 }

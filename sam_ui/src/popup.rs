@@ -2,13 +2,13 @@
 use dioxus::{logger::tracing::info, prelude::*};
 use gloo_timers::future::TimeoutFuture;
 use sam_icon::icon;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys::Array;
 
-const DEFAULT_OUTER_CLASS: &str =
+const DEFAULT_BACKDROP_CLASS: &str =
     "fixed inset-0 bg-white opacity-20 flex items-center justify-center z-50";
-const DEFAULT_INNER_CLASS: &str =
-    "absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] p-6 rounded-lg sam-shadow min-w-[300px] max-w-[90%] z-51";
+const DEFAULT_POPUP_CLASS: &str =
+    "absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-white p-6 rounded-lg sam-shadow w-max min-w-[300px] max-w-[90%] z-51";
 
 #[derive(Debug, PartialEq, Clone, Props)]
 pub struct PopupProps {
@@ -47,15 +47,15 @@ pub fn Popup(mut props: PopupProps) -> Element {
     let id = use_memo(move || sam_util::gen_id!());
 
     let backdrop_class = props.replace_backdrop_class.unwrap_or(format!(
-        "{DEFAULT_OUTER_CLASS} {}",
+        "{DEFAULT_BACKDROP_CLASS} {}",
         props.update_backdrop_class.unwrap_or_default()
     ));
     // let update_backdrop_class = format!(
-    //     "{DEFAULT_OUTER_CLASS} {}",
+    //     "{DEFAULT_BACKDROP_CLASS} {}",
     //     props.update_backdrop_class.unwrap_or_default()
     // );
     let popup_class = props.replace_popup_class.unwrap_or(format!(
-        "{DEFAULT_INNER_CLASS} {}",
+        "{DEFAULT_POPUP_CLASS} {}",
         props.update_popup_class.unwrap_or_default()
     ));
     let enter_anim_class = props.enter_anim_class.unwrap_or_default();
@@ -115,6 +115,15 @@ pub struct MsgConfig {
     pub title: String,
     pub message: String,
     pub ty: MsgType,
+
+    /// Callback to be executed on clicking ok button in a confiem msg
+    pub callback: Option<Callback<()>>,
+
+    /// Alternative text for ok button
+    pub ok_text: Option<String>,
+
+    /// Alternative text for cancel button
+    pub cancel_text: Option<String>,
 }
 
 impl MsgConfig {
@@ -142,12 +151,26 @@ impl MsgConfig {
             .show()
     }
 
+    pub fn callback(mut self, mut f: impl FnMut() + 'static) -> Self {
+        let callback = Callback::new(move |()| f());
+        self.callback = Some(callback);
+        self
+    }
+
     pub fn title(mut self, title: impl AsRef<str>) -> Self {
         self.title = title.as_ref().to_string();
         self
     }
     pub fn message(mut self, message: impl AsRef<str>) -> Self {
         self.message = message.as_ref().to_string();
+        self
+    }
+    pub fn ok_text(mut self, text: impl Into<String>) -> Self {
+        self.ok_text = Some(text.into());
+        self
+    }
+    pub fn cancel_text(mut self, text: impl Into<String>) -> Self {
+        self.cancel_text = Some(text.into());
         self
     }
 
@@ -168,6 +191,35 @@ pub enum MsgType {
     #[default]
     Err,
     Confirm,
+}
+
+impl MsgType {
+    pub fn class<T>(&self, classes: T) -> &str
+    where
+        T: AsRef<[&'static str]>,
+    {
+        let classes = classes.as_ref();
+        match self {
+            MsgType::Success => classes.get(0).unwrap_or(&""),
+            MsgType::Err => classes.get(1).unwrap_or(&""),
+            MsgType::Confirm => classes.get(2).unwrap_or(&""),
+        }
+    }
+
+    pub fn icon(&self) -> Element {
+        match self {
+            MsgType::Success => icon!(LdCircleCheck, 60, "white", "var(--color-green-500)"),
+            MsgType::Err => icon!(LdOctagonX, 60, "white", "var(--color-red-500)"),
+            MsgType::Confirm => {
+                icon!(
+                    LdMessageCircleWarning,
+                    60,
+                    "white",
+                    "var(--color-primary-500)"
+                )
+            }
+        }
+    }
 }
 
 /// Split the message property by \n to show it in multi lines
@@ -198,66 +250,87 @@ pub enum MsgType {
 /// ```
 #[component]
 pub fn Msg(mut props: MsgConfig) -> Element {
-    let msg_color = match props.ty {
-        MsgType::Err => "text-red-600",
-        MsgType::Success => "text-green-600",
-        MsgType::Confirm => "text-primary",
-    };
+    let color = props
+        .ty
+        .class(["text-green-500", "text-red-500", "text-primary-500"]);
+    let shadow = props
+        .ty
+        .class(["sam-shadow-green", "sam-shadow-red", "sam-shadow"]);
+    let btn = props.ty.class(["btn-success", "btn-err", "btn"]);
+    let ok = props.ok_text.unwrap_or("Ok".to_string());
+    let cancel = props.cancel_text.unwrap_or("Cancel".to_string());
+
     rsx! {
         Popup {
             state: props.state,
-            update_popup_class: {
-                match props.ty {
-                    MsgType::Err => "sam-shadow-red",
-                    MsgType::Success => "sam-shadow-green",
-                    MsgType::Confirm => "sam-shadow",
-                }
-            },
+            update_popup_class: "{shadow}",
             enter_anim_class: "animate__animated animate__zoomIn",
             leave_anim_class: "animate__animated animate__zoomOut",
             children: rsx! {
-                div { class: "center text-primary",
+                div {
+                    tabindex: "0",
+                    onkeydown: move |e| {
+                        if e.key() == Key::Enter {
+                            if let Some(c) = props.callback {
+                                props.state.set(PopupState::CloseWithAnimation);
+                                c.call(());
+                            } else {
+                                props.state.set(PopupState::CloseWithAnimation);
+                            }
+                        } else if e.key() == Key::Escape {
+                            props.state.set(PopupState::CloseWithAnimation);
+                        }
+                    },
+                    onmounted: move |e| {
+                        use dioxus_web::WebEventExt;
+                        if let Some(el) = e.data().as_web_event().dyn_into::<web_sys::HtmlElement>().ok()
+                        {
+                            el.focus().ok();
+                        }
+                    },
+
+                    div { class: "center text-primary-500", {props.ty.icon()} }
+                    h1 { class: "font-deplomata text-center text-2xl m-2.5 {color}", "{props.title}" }
                     {
-                        match props.ty {
-                            MsgType::Err => icon!(LdOctagonX, 60, "white", "red"),
-                            MsgType::Success => icon!(LdCircleCheck, 60, "white", "#00a63e"),
-                            MsgType::Confirm => {
-                                icon!(LdMessageCircleWarning, 60, "white", "currentcolor")
+                        let lines: Vec<&str> = props.message.split("\n").collect();
+                        rsx! {
+                            for text in lines {
+                                p { class: "text-center", "{text}" }
                             }
                         }
                     }
-                }
-
-                h1 { class: "font-deplomata text-center text-2xl m-2.5 {msg_color}", "{props.title}" }
-                {
-                    let lines: Vec<&str> = props.message.split("\n").collect();
-                    rsx! {
-                        for text in lines {
-                            p { class: "text-center", "{text}" }
+                    if props.ty == MsgType::Confirm {
+                        div { class: "flex justify-around m-8",
+                            button {
+                                class: "btn-sec mr-2.5",
+                                onclick: move |_| {
+                                    props.state.set(PopupState::CloseWithAnimation);
+                                },
+                                "{cancel}"
+                            }
+                            button {
+                                class: "btn",
+                                onclick: move |_| {
+                                    match props.callback {
+                                        Some(c) => c.call(()),
+                                        None => info!("You didn't provide a callback"),
+                                    };
+                                    props.state.set(PopupState::CloseWithAnimation);
+                                },
+                                "{ok}"
+                            }
+                        }
+                    } else {
+                        div { class: "center m-5",
+                            button {
+                                class: "{btn}",
+                                onclick: move |_| {
+                                    props.state.set(PopupState::CloseWithAnimation);
+                                },
+                                "Ok"
+                            }
                         }
                     }
-                }
-                div { class: "center m-5",
-                    button {
-                        class: match props.ty {
-                            MsgType::Err => "btn-err",
-                            MsgType::Success => "btn-success",
-                            MsgType::Confirm => "btn",
-                        },
-                        onclick: move |_| {
-                            props.state.set(PopupState::CloseWithAnimation);
-                        },
-                        "Ok"
-                    }
-
-                    button {
-                        class: "btn-sec",
-                        onclick: move |_| {
-                            props.state.set(PopupState::CloseWithAnimation);
-                        },
-                        "Ok"
-                    }
-
                 }
             },
         }
@@ -332,12 +405,12 @@ pub fn Toast(mut props: MsgConfig) -> Element {
         Popup {
             state: props.state,
             has_backdrop: false,
-            replace_popup_class: "fixed sam-shadow bottom-6 right-6 bg-green-600 text-white rounded-full min-w-[400px] max-w-[90%] h-[50px] z-51",
+            replace_popup_class: "fixed sam-shadow bottom-6 right-6 bg-green-500 text-white rounded-full min-w-[400px] max-w-[90%] h-[50px] z-51",
             enter_anim_class: "animate__animated animate__slideInRight",
             leave_anim_class: "animate__animated animate__slideOutRight",
             children: rsx! {
                 div { class: "flex h-[50px]",
-                    div { class: "center pl-1.5", {icon!(LdCircleCheck, 40, "#00a63e", "white")} }
+                    div { class: "center pl-1.5", {icon!(LdCircleCheck, 40, "var(--color-green-500)", "white")} }
                     div { class: "center grow justify-start pl-1.5",
 
                         p { class: "text-center", "{props.message}" }
@@ -361,8 +434,31 @@ pub fn Toast(mut props: MsgConfig) -> Element {
 // TODO >>
 // Handle AninmationProps and covert all str into Option<str> in order to be able to not provide from or to classes
 
+// #[derive(Clone, Debug, PartialEq, Props)]
+// pub struct PopupSpinnerConfig {
+//     state: Signal<PopupState>,
+//     config: crate::spinner::SpinnerConfig,
+// }
+
+// #[component]
+// pub fn Spinner(props: PopupSpinnerConfig) -> Element {
+//     rsx! {
+//         Popup {
+//             state: props.state,
+//             close_on_bg_click: false,
+//             replace_popup_class: "absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] z-51",
+//             update_backdrop_class: "opacity-80",
+//             enter_anim_class: "TODO",
+//             leave_anim_class: "TODO",
+//             children: rsx! {
+//                 div { class: "center", {crate::spinner::Spinner(props.config)} }
+//             },
+//         }
+//     }
+// }
+
 #[component]
-pub fn Spinner(mut state: Signal<PopupState>) -> Element {
+pub fn Spinner(state: Signal<PopupState>) -> Element {
     rsx! {
         Popup {
             state,
@@ -372,9 +468,7 @@ pub fn Spinner(mut state: Signal<PopupState>) -> Element {
             enter_anim_class: "TODO",
             leave_anim_class: "TODO",
             children: rsx! {
-                div { class: "center",
-                    img { src: asset!("/assets/spinner.svg") }
-                }
+                img { src: asset!("/assets/spinner.svg") }
             },
         }
     }

@@ -1,6 +1,6 @@
 use super::jwt::create_jwt;
 use super::user_routes::{ResetPasswordPayload, TokenInfo};
-use super::{jwt::validate_jwt, AddUser, HashUser, User, UserInfo};
+use super::{jwt::validate_jwt, LoginUser, HashUser, User, UserInfo};
 use crate::error::*;
 use sam_error::any_with_log;
 use sam_error::SamError;
@@ -13,7 +13,7 @@ use uuid::Uuid;
 #[catch_error]
 pub async fn add_pending_user(
     pool: &PgPool,
-    user: AddUser,
+    user: LoginUser,
     verification_token: String,
 ) -> Result<()> {
     let id = Uuid::new_v4();

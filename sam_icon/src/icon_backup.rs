@@ -30,37 +30,25 @@
 /// By default Lucide icons will be used
 ///
 /// ```
-/// The order of params: [name size color bg]
-/// color=stroke | bg=fill
+///     The order of params: [name size color bg]
+///     color=stroke | bg=fill
 ///
-/// [Defaults:]
-/// size: 30
-/// color: "black"
-/// fill: "white"
+///     [Defaults:]
+///     size: 30
+///     color: "black"
+///     fill: "white"
 ///
-/// You can provide onyly name
-/// icon!(LdX)
+///     You can provide onyly name
+///     icon!(LdX)
 ///
-/// You can provide name, size
-/// icon!(LdX,60)
+///     You can provide name, size
+///     icon!(LdX,60)
 ///
-/// You can provide name, size, color
-/// icon!(LdX,40,"red")
+///     You can provide name, size, color
+///     icon!(LdX,40,"red")
 ///
-/// You can provide name, size, color, bg
-/// icon!(LdX,60,"white","black")
-///
-/// rsx! {
-///         div {
-///                 {
-///                    let action = move |e: MouseEvent| {
-///                         info!("Clicked on icon with mouse event: {:#?}", e);
-///                     };
-///                    sam_icon::icon!(LdMail, 20, "white", "blue", "blue", "white", onclick : action)
-///                 }
-///         }
-///},
-///
+///     You can provide name, size, color, bg
+///     icon!(LdX,60,"white","black")
 /// ```
 #[cfg(feature = "lucide")]
 #[macro_export]
@@ -126,76 +114,6 @@ macro_rules! icon {
                 height: $size,
                 icon: $name,
                 style: format!("stroke:{};fill:{};",$color,$bg)
-            }
-        }
-    }};
-
-    (
-        $name:ident,
-        $size:expr,
-        $color:expr,
-        $bg:expr,
-        $hover_color:expr,
-        $hover_bg:expr,
-    ) => {{
-        use dioxus::prelude::*;
-        use $crate::Icon;
-        use $crate::icons::ld_icons::$name;
-        let mut color = use_signal(|| $color);
-        let mut bg = use_signal(|| $bg);
-        rsx! {
-            div {
-                onmouseover: move |_| {
-                    color.set($hover_color);
-                    bg.set($hover_bg);
-                },
-                onmouseout: move |_| {
-                    color.set($color);
-                    bg.set($bg);
-                },
-                Icon {
-                    width: $size,
-                    height: $size,
-                    icon: $name,
-                    style: format!("stroke:{};fill:{};",color(),bg())
-                }
-            }
-        }
-    }};
-
-    (
-        $name:ident,
-        $size:expr,
-        $color:expr,
-        $bg:expr,
-        $hover_color:expr,
-        $hover_bg:expr,
-        onclick: $onclick:ident
-    ) => {{
-        use dioxus::prelude::*;
-        use $crate::Icon;
-        use $crate::icons::ld_icons::$name;
-        let mut color = use_signal(|| $color);
-        let mut bg = use_signal(|| $bg);
-        rsx! {
-            div {
-                onclick: move |e| {
-                    $onclick(e);
-                },
-                onmouseover: move |_| {
-                    color.set($hover_color);
-                    bg.set($hover_bg);
-                },
-                onmouseout: move |_| {
-                    color.set($color);
-                    bg.set($bg);
-                },
-                Icon {
-                    width: $size,
-                    height: $size,
-                    icon: $name,
-                    style: format!("stroke:{};fill:{};",color(),bg())
-                }
             }
         }
     }};

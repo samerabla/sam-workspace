@@ -1,3 +1,5 @@
+@import "./input.css";
+
 .center {
     display: flex;
     justify-content: center;
@@ -17,7 +19,7 @@
     align-items: center;
 }
 
-.fixed {
+.sam-fixed {
     position: fixed;
     top:0;
     bottom:0;

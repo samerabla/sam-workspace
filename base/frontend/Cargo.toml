@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 dioxus = { workspace = true, features = ["router"] }
+dioxus-html = { version = "0.6.1", features = ["serialize"] }
+dioxus-web = { workspace = true}
 serde = { workspace = true }
 serde_json = { workspace = true }
 web-sys.workspace = true
@@ -14,3 +16,4 @@ gloo-net = "0.5"
 
 sam_util = {path = "../../sam_util"}
 sam_ui = {path = "../../sam_ui"}
+sam_icon = {path = "../../sam_icon"}
