@@ -7,8 +7,10 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SamError {
-    #[error("{0}")]
-    Database(#[from] sqlx::Error),
+    // #[error("{0}")]
+    // Database(#[from] sqlx::Error),
+    #[error("A database error occurred: {0}")]
+    Database(String),
     #[error("{0}")]
     InvalidJson(#[from] JsonRejection),
     #[error("Login failed: email or password is wrong")]
@@ -34,7 +36,7 @@ pub enum SamError {
     #[error("Something went wrong")]
     Any,
     #[error("{0}")]
-    AnyWithContext(String),
+    Err(String),
 }
 
 impl IntoResponse for SamError {
@@ -56,7 +58,25 @@ impl IntoResponse for SamError {
 
 impl From<String> for SamError {
     fn from(value: String) -> Self {
-        SamError::AnyWithContext(value)
+        SamError::Err(value)
+    }
+}
+
+impl From<sqlx::Error> for SamError {
+    fn from(err: sqlx::Error) -> Self {
+        use sqlx::Error::*;
+        let message = match &err {
+            Database(db_err) => {
+                if db_err.is_unique_violation() {
+                    "Entity already exists.".to_string()
+                } else {
+                    format!("Database error: {}", db_err)
+                }
+            }
+            RowNotFound => "No matching record found.".to_string(),
+            _ => format!("Unexpected database error: {}", err),
+        };
+        SamError::Database(message)
     }
 }
 

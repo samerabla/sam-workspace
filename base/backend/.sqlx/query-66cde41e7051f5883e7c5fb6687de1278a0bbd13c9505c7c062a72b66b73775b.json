@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE pending_users\n        SET verification_token = $1\n        WHERE email = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "66cde41e7051f5883e7c5fb6687de1278a0bbd13c9505c7c062a72b66b73775b"
+}

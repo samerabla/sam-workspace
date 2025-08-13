@@ -8,6 +8,11 @@ dioxus = { workspace = true}
 dioxus-sdk = { workspace = true, features = ["window_size"] }
 wasm-bindgen.workspace = true
 js-sys.workspace = true
+web-sys.workspace = true
+gloo-net.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true }
+
 
 rand = { workspace = true}
 getrandom = { workspace = true}
@@ -15,6 +20,9 @@ regex = { workspace = true}
 validator = { workspace = true }
 
 lettre = { version = "0.11.14", optional = true }
+sqlx = { workspace = true, optional = true, features = ["postgres","runtime-tokio-native-tls","uuid","time"] }
+polars = { workspace = true, optional = true, features = ["lazy", "temporal", "strings","polars-io","json"] }
 
 [features]
 gmail = ["dep:lettre"] 
+dataset = ["dep:sqlx","dep:polars"] 

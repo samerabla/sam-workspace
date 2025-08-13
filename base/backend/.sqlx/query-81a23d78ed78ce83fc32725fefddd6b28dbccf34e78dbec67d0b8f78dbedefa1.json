@@ -1,0 +1,75 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT \n                id,\n                data_type as \"data_type: FieldDataType\",\n                is_required,\n                validation_rules,\n                is_filterable,\n                is_searchable,\n                sort_order\n            FROM fields \n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "data_type: FieldDataType",
+        "type_info": {
+          "Custom": {
+            "name": "field_data_type",
+            "kind": {
+              "Enum": [
+                "string",
+                "integer",
+                "decimal",
+                "select",
+                "multiselect",
+                "boolean",
+                "date",
+                "file",
+                "location"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_required",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "validation_rules",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_filterable",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_searchable",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "sort_order",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "81a23d78ed78ce83fc32725fefddd6b28dbccf34e78dbec67d0b8f78dbedefa1"
+}

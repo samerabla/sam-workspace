@@ -55,12 +55,11 @@ impl InputAppearance {
 pub struct InputConfig {
     #[props(extends = GlobalAttributes, extends = input)]
     attributes: Vec<Attribute>,
-    oninput: EventHandler<FormEvent>,
+    oninput: Option<EventHandler<FormEvent>>,
     #[props(default)]
     appearance: InputAppearance,
-    #[props(default = true)]
     label: Option<String>,
-    #[props(default = true)]
+    #[props(default = false)]
     animated_label: bool,
     placeholder: Option<String>,
     class: Option<String>,
@@ -111,7 +110,9 @@ pub fn Input(props: InputConfig) -> Element {
                 id: id(),
                 placeholder: if props.animated_label { " " } else { props.placeholder.as_deref().unwrap_or("") },
                 oninput: move |e| {
-                    props.oninput.call(e);
+                    if let Some(oninput) = &props.oninput {
+                        oninput.call(e);
+                    }
                 },
                 ..props.attributes,
             }

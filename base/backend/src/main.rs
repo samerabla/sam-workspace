@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use frontend::App;
 
 use sam_error::SamError;
-use std::{any::Any, sync::Arc};
+use std::{any::Any, net::SocketAddr, sync::Arc};
 
 use axum::{
     body::{self, Body, Bytes},
@@ -28,11 +28,20 @@ use tracing_error::ErrorLayer;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 use error::{error_middleware, handle_error};
-use user::{auth_middleware, user_routes, Claims, User, UserInfo};
+use user::{auth_middleware, user_routes, Claims};
 
+use crate::{category::category_routes, language::language_routes};
+use utils::get_host;
+
+mod abac;
+mod category;
 mod error;
+mod field;
+mod language;
+mod listing;
 mod response;
 mod user;
+mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), SamError> {
@@ -54,8 +63,8 @@ async fn main() -> Result<(), SamError> {
 
     // We add several origins for local host
     let allowed_origins = vec![
-        HeaderValue::from_static("http://localhost:9000"),
-        HeaderValue::from_static("http://127.0.0.1:9000"),
+        HeaderValue::from_static("https://localhost:9000"),
+        HeaderValue::from_static("https://127.0.0.1:9000"),
     ];
 
     let cors_layer = CorsLayer::new()
@@ -63,7 +72,13 @@ async fn main() -> Result<(), SamError> {
         .allow_origin(AllowOrigin::predicate(move |origin, _| {
             allowed_origins.contains(origin)
         }))
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
         .allow_headers([ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION])
         .allow_credentials(true)
         .expose_headers([http::header::SET_COOKIE]);
@@ -80,6 +95,8 @@ async fn main() -> Result<(), SamError> {
         )
         .route("/internal-error", get(internal_err_handler))
         .merge(user_routes(state.clone()))
+        .merge(category_routes(state.clone()))
+        .merge(language_routes(state.clone()))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             error_middleware,
@@ -104,9 +121,19 @@ async fn main() -> Result<(), SamError> {
         .layer(cors_layer)
         .with_state(state);
     //.fallback(fallback_handler)
+    let host = get_host()?;
+    let addr: SocketAddr = host
+        .split("://")
+        .collect::<Vec<&str>>()
+        .get(1)
+        .ok_or(SamError::Err("Invalid host format".to_string()))?
+        .parse::<SocketAddr>()
+        .map_err(|_| SamError::Err("Failed to parse host address".to_string()))?;
+    // let addr: SocketAddr = "127.0.0.1:3001".parse().unwrap();
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    // let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    println!("Axum listening on http://{addr}");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    println!("Listening on port 3000 ...");
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }

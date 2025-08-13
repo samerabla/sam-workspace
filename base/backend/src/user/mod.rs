@@ -1,6 +1,7 @@
 use crate::error::Result;
 use password::hash_password;
 use serde::{Deserialize, Serialize};
+use shared::user::LoginUser;
 use sqlx::FromRow;
 use time::OffsetDateTime;
 
@@ -19,37 +20,48 @@ mod user_db;
 mod user_emails;
 mod user_routes;
 
-#[derive(Debug, Clone, Deserialize)]
-struct LoginUser {
-    email: String,
-    password: String,
+// #[derive(Debug, Clone, Deserialize)]
+// struct LoginUser {
+//     email: String,
+//     password: String,
+// }
+
+trait LoginUserExt {
+    fn hash(self) -> Result<LoginUser>;
 }
 
-impl LoginUser {
-    pub fn hash(mut self) -> Result<Self> {
+impl LoginUserExt for LoginUser {
+    fn hash(mut self) -> Result<Self> {
         self.password = hash_password(self.password.as_str())?;
         Ok(self)
     }
 }
 
-#[derive(Debug, FromRow)]
-pub struct HashUser {
-    id: uuid::Uuid,
-    password: String,
-    email: String,
-}
+// impl LoginUser {
+//     pub fn hash(mut self) -> Result<Self> {
+//         self.password = hash_password(self.password.as_str())?;
+//         Ok(self)
+//     }
+// }
 
-#[derive(Debug, FromRow)]
-pub struct UserInfo {
-    id: String,
-    email: String,
-    created_at: OffsetDateTime,
-}
+// #[derive(Debug, FromRow)]
+// pub struct HashUser {
+//     id: uuid::Uuid,
+//     password: String,
+//     email: String,
+// }
 
-#[derive(Debug, FromRow)]
-pub struct User {
-    id: String,
-    email: String,
-    password: String,
-    created_at: OffsetDateTime,
-}
+// #[derive(Debug, FromRow)]
+// pub struct UserInfo {
+//     id: String,
+//     email: String,
+//     created_at: OffsetDateTime,
+// }
+
+// #[derive(Debug, FromRow)]
+// pub struct User {
+//     id: String,
+//     email: String,
+//     password: String,
+//     created_at: OffsetDateTime,
+// }

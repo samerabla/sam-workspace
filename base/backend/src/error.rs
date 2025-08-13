@@ -15,7 +15,7 @@ use axum::{
 // use thiserror::Error;
 
 use crate::{
-    response::{IntoCustomResponse, UserResponse},
+    response::{IntoUserResponse, UserResponse},
     AppState,
 };
 type BoxError = Box<dyn Any + Send + 'static>;
@@ -97,18 +97,18 @@ pub async fn error_middleware(request: Request, next: Next) -> Response {
         if let Ok(body_bytes) = to_bytes(body, usize::MAX).await {
             // Try to parse the body as JSON
             match serde_json::from_slice::<UserResponse>(&body_bytes) {
-                Ok(user_response) => user_response.into_error_response(),
+                Ok(user_response) => user_response.into_response(),
                 Err(_) => {
                     // If the body is not JSON, treat it as a plain string
                     let message = String::from_utf8(body_bytes.to_vec())
                         .unwrap_or_else(|_| "Unknown error".to_string());
 
-                    UserResponse::new(message.as_str(), status_code).into_error_response()
+                    UserResponse::with_error_and_code(message.as_str(), status_code).into_response()
                 }
             }
         } else {
-            //UserResponse::new("From here", 200).into_error_response()
-            UserResponse::into_gen_error_response()
+            UserResponse::with_error_and_code("Failed to read response body", status_code)
+                .into_response()
         }
     } else {
         response

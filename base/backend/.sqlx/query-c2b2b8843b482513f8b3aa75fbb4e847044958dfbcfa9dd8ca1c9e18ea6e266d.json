@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into password_reset_tokens (email,token) \n        values ($1,$2); \n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c2b2b8843b482513f8b3aa75fbb4e847044958dfbcfa9dd8ca1c9e18ea6e266d"
+}

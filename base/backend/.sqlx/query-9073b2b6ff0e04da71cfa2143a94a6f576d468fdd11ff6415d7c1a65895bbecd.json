@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO categories (id,parent_id)\n        VALUES ($1, $2) \n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9073b2b6ff0e04da71cfa2143a94a6f576d468fdd11ff6415d7c1a65895bbecd"
+}

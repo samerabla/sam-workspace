@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT \n                field_id,\n                COALESCE(\n                    to_jsonb(value_text),\n                    to_jsonb(value_integer),\n                    to_jsonb(value_decimal),\n                    to_jsonb(value_boolean),\n                    to_jsonb(value_date),\n                    to_jsonb(value_datetime),\n                    value_json\n                ) as value\n            FROM listing_field_values\n            WHERE listing_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "field_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "value",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "c4ac78de8b3b7f5ce02b8a5d293f66e5524b9e0f17110aa2d2c8d60f53d60c8f"
+}

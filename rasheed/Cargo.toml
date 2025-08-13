@@ -1,9 +1,0 @@
-[package]
-name = "rasheed"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-axum.workspace = true
-rand = {version = "0.9.1", features = ["thread_rng"]}
-tokio = { version = "1.45.1", features = ["full"] }

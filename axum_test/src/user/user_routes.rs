@@ -13,7 +13,7 @@ use super::{
     user_emails::{
         generate_forgot_password_body, generate_verify_email_body, send_verification_email,
     },
-    LoginUser, Claims, LoginUser,
+    Claims, LoginUser, LoginUser,
 };
 use crate::{error::Result, response::UserResponse, AppState};
 use axum::{

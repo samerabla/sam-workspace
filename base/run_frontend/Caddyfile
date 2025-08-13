@@ -1,0 +1,11 @@
+# Frontend (Dioxus dev server)
+https://localhost:9000 {
+    tls internal
+    reverse_proxy 127.0.0.1:9000
+}
+
+# Backend (Axum)
+https://localhost:3000 {
+    tls internal
+    reverse_proxy 127.0.0.1:3001
+}

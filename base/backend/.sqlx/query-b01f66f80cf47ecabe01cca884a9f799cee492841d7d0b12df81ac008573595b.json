@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO categories_names (name,language_id,category_id,slug)\n        VALUES ($1, $2, $3, $4) \n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b01f66f80cf47ecabe01cca884a9f799cee492841d7d0b12df81ac008573595b"
+}

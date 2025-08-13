@@ -1,10 +1,12 @@
 use super::jwt::create_jwt;
 use super::user_routes::{ResetPasswordPayload, TokenInfo};
-use super::{jwt::validate_jwt, HashUser, LoginUser, User, UserInfo};
+use super::{jwt::validate_jwt, LoginUser};
 use crate::error::*;
 use sam_error::any_with_log;
 use sam_error::SamError;
 use sam_proc_macros::catch_error;
+use shared::user::UserRole;
+use shared::user::{HashUser, UserInfo};
 use sqlx::{query, query_as, PgPool, Postgres};
 use std::error::Error;
 use std::sync::Arc;
@@ -87,7 +89,7 @@ where
     let user: UserInfo = query_as!(
         UserInfo,
         r#"
-        SELECT id, email, created_at
+        SELECT id, email, role as "role: UserRole", attributes, created_at
         FROM users
         WHERE email = $1
         "#,
@@ -124,7 +126,7 @@ pub async fn fetch_user_by_id(pool: &PgPool, id: Uuid) -> Result<UserInfo> {
     let user: UserInfo = query_as!(
         UserInfo,
         r#"
-        SELECT id, email, created_at
+        SELECT id, email, role as "role: UserRole", attributes, created_at
         FROM users
         WHERE id = $1
         "#,

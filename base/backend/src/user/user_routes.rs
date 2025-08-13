@@ -1,5 +1,12 @@
+use std::sync::Arc;
+
+use http::{HeaderMap, HeaderName, HeaderValue, StatusCode};
 use sam_error::SamError;
 use sam_util::validators::{validate_email, validate_password};
+use shared::{
+    dashboard::{DashNavItem, DashNavItemInfo},
+    user::{UserInfo, UserRole},
+};
 
 use super::{
     cookie::create_cookie,
@@ -13,27 +20,36 @@ use super::{
     user_emails::{
         generate_forgot_password_body, generate_verify_email_body, send_verification_email,
     },
-    Claims, LoginUser,
+    Claims, LoginUser, LoginUserExt,
 };
 use crate::{
     error::Result,
-    response::{IntoCustomResponse, UserResponse},
+    response::{IntoUserResponse, UserResponse},
+    user::auth_middleware,
     AppState,
 };
 use axum::{
     extract::{rejection::JsonRejection, Query, State},
+    middleware,
     response::{IntoResponse, Response},
     routing::{get, post},
-    Json, Router,
+    Extension, Json, Router,
 };
 use axum_extra::extract::CookieJar;
 use sam_proc_macros::catch_error;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 pub fn user_routes(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/users/test", get(|| async { "Hello" }))
+        .route(
+            "/users/check-auth",
+            get(check_auth_handler).route_layer(middleware::from_fn_with_state(
+                state.clone(),
+                auth_middleware,
+            )),
+        )
         .route("/users/add", post(add_user_handler))
         .route("/users/login", post(login_user_handler))
         .route(
@@ -52,7 +68,64 @@ pub fn user_routes(state: AppState) -> Router<AppState> {
         )
         .route("/users/forgot-password", post(forgot_password_handler))
         .route("/users/reset-password", post(reset_password_handler))
+        .route(
+            "/users/dashboard/nav-items",
+            get(dash_nav_items_handler).route_layer(middleware::from_fn_with_state(
+                state.clone(),
+                auth_middleware,
+            )),
+        )
         .with_state(state)
+}
+
+fn dash_nav_items() -> Vec<DashNavItem> {
+    vec![
+        DashNavItem::new(
+            "Categories".to_string(),
+            "cat".to_string(),
+            "/dashboard/categories".to_string(),
+            vec![UserRole::SuperAdmin],
+        ),
+        DashNavItem::new(
+            "Languages".to_string(),
+            "languages".to_string(),
+            "/dashboard/languages".to_string(),
+            vec![UserRole::SuperAdmin],
+        ),
+        DashNavItem::new(
+            "Fields".to_string(),
+            "fields".to_string(),
+            "/dashboard/fields".to_string(),
+            vec![UserRole::SuperAdmin],
+        ),
+        DashNavItem::new(
+            "Listings".to_string(),
+            "list".to_string(),
+            "/dashboard/settings".to_string(),
+            vec![UserRole::SuperAdmin, UserRole::Admin, UserRole::User],
+        ),
+    ]
+}
+
+async fn dash_nav_items_handler(
+    State(state): State<AppState>,
+    Extension(user): Extension<Arc<UserInfo>>,
+) -> Result<Response> {
+    let items = dash_nav_items()
+        .into_iter()
+        .filter(|item| item.required_roles.contains(&user.role))
+        .map(DashNavItemInfo::from)
+        .collect::<Vec<_>>();
+    let res = UserResponse::with_json(items).into_response();
+    Ok(res)
+}
+
+async fn check_auth_handler(
+    State(state): State<AppState>,
+    Extension(user): Extension<Arc<UserInfo>>,
+) -> Result<Response> {
+    let res = UserResponse::with_json(user).into_response();
+    Ok(res)
 }
 
 async fn add_user_handler(
@@ -82,11 +155,11 @@ async fn add_user_handler(
     let body = generate_verify_email_body(verification_token)?;
     send_verification_email(body, "Verify Your Email", &email).await?;
 
-    let res = UserResponse::new(
+    let res = UserResponse::with_success_and_code(
         "User added successfully! The only step left is to check your email and verify it.",
         201,
     )
-    .into_success_response();
+    .into_response();
     Ok(res)
 }
 
@@ -110,7 +183,7 @@ async fn login_user_handler(
     let cookie = create_cookie("token".to_string(), token, seconds);
     let cookies = cookies.add(cookie);
 
-    let res = UserResponse::new("Logedin Successfully", 200).into_success_response();
+    let res = UserResponse::with_success("Logedin Successfully").into_response();
     Ok((cookies, res).into_response())
 }
 
@@ -118,7 +191,7 @@ async fn logout_user_handler(cookies: CookieJar) -> Result<Response> {
     // Create an expired cookie to remove the JWT
     let expired_cookie = create_cookie("token".to_string(), "".to_string(), 0);
     let cookies = cookies.add(expired_cookie);
-    let res = UserResponse::new("Logged out successfully", 200).into_success_response();
+    let res = UserResponse::with_success("Logged out successfully").into_response();
 
     Ok((cookies, res).into_response())
 }
@@ -141,7 +214,7 @@ pub async fn verify_email_handler(
     // Add the user to the 'users' table and delete it from the 'pending_users' table
     move_pending_user(&state.pool, user).await?;
 
-    let res = UserResponse::new("Email verified successfully", 200).into_success_response();
+    let res = UserResponse::with_success("Email verified successfully").into_response();
     Ok(res)
 }
 
@@ -166,8 +239,8 @@ pub async fn resend_verification_handler(
     // Send email for verifying
     let body = generate_verify_email_body(verification_token)?;
     send_verification_email(body, "Verify Your Email", &email).await?;
-    let res = UserResponse::new("Resent successfully! check your email and verify it.", 200)
-        .into_success_response();
+    let res = UserResponse::with_success("Resent successfully! check your email and verify it.")
+        .into_response();
     Ok(res)
 }
 
@@ -184,14 +257,14 @@ pub async fn forgot_password_handler(
     let user = match fetch_user_by_email(&state.pool, payload.email).await {
         Ok(user) => user,
         // We use an ambiguous message with ok status code for security purposes.
-        Err(_) => return Ok(UserResponse::new("Check Your Email Box", 200).into_success_response()),
+        Err(_) => return Ok(UserResponse::with_success("Check Your Email Box").into_response()),
     };
     let email = user.email;
     let verification_token = create_jwt(&email, 60 * 60)?;
     let body = generate_forgot_password_body(verification_token.clone())?;
     send_verification_email(body, "Forgot Password", &email).await?;
     add_reset_password_token(&state.pool, email, verification_token).await?;
-    Ok(UserResponse::new("Check Your Email Box", 200).into_success_response())
+    Ok(UserResponse::with_success("Check Your Email Box").into_response())
 }
 
 #[derive(Deserialize)]
@@ -232,5 +305,5 @@ pub async fn reset_password_handler(
     // Remove token from db
     delete_token(&state.pool, token_info.token).await?;
 
-    Ok(UserResponse::new("Password reset successfully", 200).into_success_response())
+    Ok(UserResponse::with_success("Password reset successfully").into_response())
 }
