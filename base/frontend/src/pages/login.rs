@@ -1,7 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
-
 use dioxus::{logger::tracing::info, prelude::*};
-use gloo_net::http::Request;
 use sam_ui::{input::*, popup::*, spinner::SpinnerConfig};
 use sam_util::{
     post_json,
@@ -9,7 +6,6 @@ use sam_util::{
 };
 use serde::{Deserialize, Serialize};
 use shared::user::*;
-use web_sys::RequestCredentials;
 
 use crate::route::Route;
 
@@ -22,7 +18,7 @@ pub fn LoginPage() -> Element {
     let mut email_error = use_signal(|| None);
     let mut password_error = use_signal(|| None);
     let mut is_valid = use_signal(|| false);
-    let user_state = use_context::<Signal<Rc<RefCell<UserState>>>>();
+    let user_state = use_context::<Signal<SharedUserState>>();
 
     let onsubmit = move |evt: FormEvent| {
         spinner_state.set(PopupState::Open);
@@ -58,7 +54,7 @@ pub fn LoginPage() -> Element {
                             nav.push(redirect);
                             user_state_mut.redirect_to = None;
                         } else {
-                            nav.push(Route::DashboardPage {});
+                            nav.push(Route::DashboardHomepage {});
                         }
                     } else {
                         msg.set(MsgConfig::with_err(json.message()));

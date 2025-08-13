@@ -8,14 +8,16 @@ pub enum Route {
     HomePage {},
 
     #[nest("/dashboard")]
-        #[route("/")]
-        DashboardPage {},
-        #[route("/categories")]
-        Categories {},
-        #[route("/languages")]
-        AddLanguage {},
-        #[route("/fields")]
-        Field {},
+        #[layout(DashboardPage)]
+            #[route("/")]
+            DashboardHomepage {},
+            #[route("/categories")]
+            Categories {},
+            #[route("/languages")]
+            AddLanguage {},
+            #[route("/fields")]
+            Field {},
+         #[end_layout]
     #[end_nest]
 
     #[route("/login")]

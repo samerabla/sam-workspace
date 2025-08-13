@@ -40,7 +40,7 @@ pub fn DashboardNavbar() -> Element {
         .clone()
         .unwrap_or(Vec::new());
     rsx! {
-        div { class: "dashboard",
+        div { class: " max-w-fit",
             for item in items.iter() {
                 NavbarItem { item: item.clone() }
             }
@@ -54,7 +54,7 @@ pub fn DashboardNavbar() -> Element {
 #[component]
 pub fn NavbarItem(item: DashNavItemInfo) -> Element {
     rsx! {
-        div { class: "dashboard",
+        div { class: "dashboard bg-primary-500 text-white p-2",
             Link { to: "{item.route}", class: "nav-link", "{item.name}" }
         }
     }

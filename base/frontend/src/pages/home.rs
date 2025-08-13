@@ -7,7 +7,7 @@ use crate::input::LoginForm;
 
 #[component]
 pub fn HomePage() -> Element {
-    let x = use_context::<Signal<Rc<RefCell<UserState>>>>();
+    let x = use_context::<Signal<SharedUserState>>();
     info!("from home: {:#?}", x().borrow());
 
     rsx! {
