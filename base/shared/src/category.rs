@@ -42,7 +42,7 @@ pub struct CategoryWithNames {
     pub names: Vec<CategoryName>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Language {
     pub id: String,
     pub name: String,

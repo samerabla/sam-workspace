@@ -1,15 +1,5 @@
 #![allow(non_snake_case)]
-// use dioxus::prelude::*;
 use std::{fmt::Debug, rc::Rc};
-
-mod menu_bar;
-pub use menu_bar::*;
-
-mod menu_list;
-pub use menu_list::*;
-
-mod dropdown_menu;
-pub use dropdown_menu::*;
 
 mod menu;
 pub use menu::*;

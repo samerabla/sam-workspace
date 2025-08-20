@@ -15,7 +15,9 @@ pub fn language_routes(state: AppState) -> Router<AppState> {
     Router::new()
         .route(
             "/languages",
-            get(list_languages_handler).post(add_language_handler),
+            get(list_languages_handler)
+                .post(add_language_handler)
+                .put(update_language_handler),
         )
         .route(
             "/languages/{id}",
@@ -43,6 +45,15 @@ async fn add_language_handler(
     Json(language): Json<Language>,
 ) -> Result<Response> {
     add_language(&state.pool, language).await?;
+    let res = UserResponse::with_success("Language Added Successfully").into_response();
+    Ok(res)
+}
+
+async fn update_language_handler(
+    State(state): State<AppState>,
+    Json(language): Json<Language>,
+) -> Result<Response> {
+    update_language(&state.pool, language).await?;
     let res = UserResponse::with_success("Language Added Successfully").into_response();
     Ok(res)
 }

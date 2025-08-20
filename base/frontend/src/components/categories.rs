@@ -26,8 +26,8 @@ pub fn AddCategory() -> Element {
 pub fn EditCategory(category: Category, names: Vec<CategoryName>) -> Element {
     rsx! {
         CategoryForm {
-            existing_category: category,
-            existing_names: names,
+            edited_category: category,
+            edited_names: names,
             is_edit_mode: true,
         }
     }
@@ -35,8 +35,8 @@ pub fn EditCategory(category: Category, names: Vec<CategoryName>) -> Element {
 
 #[derive(Clone, Debug, PartialEq, Props)]
 pub struct CategoryFormProps {
-    pub existing_category: Option<Category>,
-    pub existing_names: Option<Vec<CategoryName>>,
+    pub edited_category: Option<Category>,
+    pub edited_names: Option<Vec<CategoryName>>,
     #[props(default = false)]
     pub is_edit_mode: bool,
 }
@@ -53,14 +53,14 @@ pub fn CategoryForm(props: CategoryFormProps) -> Element {
 
     // Initialize form with existing data if in edit mode
     use_effect(move || {
-        if let Some(category) = &props.existing_category {
+        if let Some(category) = &props.edited_category {
             category_id.set(category.id.clone());
             parent_id.set(category.parent_id.clone().unwrap_or_default());
         }
 
-        if let Some(existing_names) = &props.existing_names {
+        if let Some(edited_names) = &props.edited_names {
             let mut names_map = HashMap::new();
-            for name in existing_names {
+            for name in edited_names {
                 names_map.insert(name.language_id.clone(), name.clone());
             }
             names.set(names_map);

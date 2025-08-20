@@ -39,3 +39,11 @@ pub async fn fetch_data(url: &str) -> Result<Response, String> {
         .await
         .map_err(|e| format!("Request failed: {}", e))
 }
+
+pub async fn delete_entity(url: &str) -> Result<Response, String> {
+    Request::delete(url)
+        .credentials(RequestCredentials::Include)
+        .send()
+        .await
+        .map_err(|e| format!("Request failed: {}", e))
+}

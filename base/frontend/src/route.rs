@@ -6,7 +6,8 @@ use dioxus::prelude::*;
 pub enum Route {
     #[route("/")]
     HomePage {},
-
+    #[route("/dashboard-middleware")]
+    DashboardMiddleware {},
     #[nest("/dashboard")]
         #[layout(DashboardPage)]
             #[route("/")]
@@ -14,12 +15,11 @@ pub enum Route {
             #[route("/categories")]
             Categories {},
             #[route("/languages")]
-            AddLanguage {},
+            Languages {},
             #[route("/fields")]
             Field {},
          #[end_layout]
     #[end_nest]
-
     #[route("/login")]
     LoginPage {},
 

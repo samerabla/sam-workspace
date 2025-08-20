@@ -2,7 +2,10 @@ use dioxus::{logger::tracing::info, prelude::*};
 use input::*;
 use route::Route;
 use sam_util::fetch_data;
-use shared::user::{SharedUserState, UserInfo, UserResponse, UserState};
+use shared::{
+    dashboard::DashNavItemInfo,
+    user::{SharedUserState, UserInfo, UserResponse, UserState},
+};
 use std::{cell::RefCell, rc::Rc};
 
 mod components;
@@ -69,6 +72,9 @@ pub fn App() -> Element {
     });
 
     use_context_provider::<Signal<Rc<RefCell<UserState>>>>(move || user_state);
+
+    let dash_nav_items = use_signal(|| Rc::new(RefCell::new(Vec::new())));
+    use_context_provider::<Signal<Rc<RefCell<Vec<DashNavItemInfo>>>>>(move || dash_nav_items);
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Stylesheet { href: "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" }

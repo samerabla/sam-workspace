@@ -122,15 +122,26 @@ fn Nav() -> Element {
     let mut menu_bar = use_signal(|| vec![menu3, menu1, menu2, menu4]);
     let mut is_mobile = use_signal(|| false);
 
+    let menu_from_util = sam_util::Menu::new(rsx!("slideshow"), 0).children(vec![
+        sam_util::Menu::new(rsx!("slideshow 1"), 1).children(vec![
+            sam_util::Menu::new(rsx!("slideshow ***********"), 2).action(|| info!("*******")),
+            sam_util::Menu::new(rsx!("slideshow --------"), 2).action(|| info!("----")),
+            sam_util::Menu::new(rsx!("slideshow ++++++"), 2).action(|| info!("+++++")),
+        ]),
+        sam_util::Menu::new(rsx!("slideshow 2"), 0).action(|| info!("2 util clicked")),
+        sam_util::Menu::new(rsx!("slideshow 3"), 0).action(|| info!("3 util clicked")),
+    ]);
+
+    // if IS_MOBILE() {
+
+    //     sam_ui::header::MenuList { menu_list: menu_bar() }
+    // } else {
+
+    //     sam_ui::header::MenuBar { menu_list: menu_bar() }
+    // }
     rsx! {
+        {menu_from_util.render()}
         // Global app resources
-        if IS_MOBILE() {
-
-            sam_ui::header::MenuList { menu_list: menu_bar() }
-        } else {
-
-            sam_ui::header::MenuBar { menu_list: menu_bar() }
-        }
         Outlet::<Route> {}
         div { "footer" }
     }

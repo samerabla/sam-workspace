@@ -1,6 +1,3 @@
-mod dashboard_navbar;
-pub use dashboard_navbar::*;
-
 mod categories;
 pub use categories::*;
 

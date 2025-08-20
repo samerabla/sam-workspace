@@ -49,6 +49,27 @@ pub async fn add_language(pool: &PgPool, language: Language) -> Result<()> {
 }
 
 #[catch_error]
+pub async fn update_language(pool: &PgPool, language: Language) -> Result<()> {
+    query!(
+        r#"
+        UPDATE languages
+        SET
+            name = $2,
+            flag = $3,
+            active = $4
+        WHERE id = $1
+        "#,
+        language.id,
+        language.name,
+        language.flag,
+        language.active
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+#[catch_error]
 pub async fn delete_language(pool: &PgPool, language_id: String) -> Result<()> {
     query!(
         r#"

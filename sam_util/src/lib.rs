@@ -13,6 +13,9 @@ pub use web::to_js_array;
 mod api;
 pub use api::*;
 
+mod browser;
+pub use browser::*;
+
 #[cfg(feature = "dataset")]
 mod dataset;
 #[cfg(feature = "dataset")]
@@ -20,3 +23,6 @@ pub use dataset::*;
 
 #[cfg(feature = "gmail")]
 pub mod gmail;
+
+mod menu;
+pub use menu::*;

@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 dioxus = { workspace = true}
+dioxus-web = { workspace = true}
+
 dioxus-sdk = { workspace = true, features = ["window_size"] }
 wasm-bindgen.workspace = true
 js-sys.workspace = true

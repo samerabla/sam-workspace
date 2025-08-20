@@ -1,11 +1,13 @@
+use std::{cell::RefCell, rc::Rc};
+
 use dioxus::{logger::tracing::info, prelude::*};
 use sam_ui::{input::*, popup::*, spinner::SpinnerConfig};
 use sam_util::{
-    post_json,
+    fetch_data, post_json,
     validators::{validate_email, validate_password},
 };
 use serde::{Deserialize, Serialize};
-use shared::user::*;
+use shared::{dashboard::DashNavItemInfo, user::*};
 
 use crate::route::Route;
 
@@ -49,12 +51,13 @@ pub fn LoginPage() -> Element {
                         let mut user_state_mut = user_state_rc.borrow_mut();
                         user_state_mut.email = Some(user.email.clone());
                         success_msg.set(MsgConfig::with_success(json.message()));
+
                         let nav = use_navigator();
                         if let Some(redirect) = redirect_to {
                             nav.push(redirect);
                             user_state_mut.redirect_to = None;
                         } else {
-                            nav.push(Route::DashboardHomepage {});
+                            nav.push(Route::DashboardMiddleware {});
                         }
                     } else {
                         msg.set(MsgConfig::with_err(json.message()));
