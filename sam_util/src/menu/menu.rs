@@ -1,11 +1,8 @@
 use std::{rc::Rc, u8};
 
 use super::Action;
-use dioxus::{
-    html::{menu, u::is},
-    logger::tracing::info,
-    prelude::*,
-};
+use dioxus::{logger::tracing::info, prelude::*};
+use wasm_bindgen::JsCast;
 
 // TODO:
 // add menu separator
@@ -59,6 +56,38 @@ struct MenuState {
     pub show: Signal<bool>,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct MenuBarState {
+    pub opened_menu: Signal<Option<String>>,
+}
+
+#[component]
+pub fn MenuBar(menu_list: Vec<Menu>) -> Element {
+    const HEADER_CLASS: Asset = asset!("/assets/header.css");
+    const MAIN_CSS: Asset = asset!("/assets/main.css");
+    let mut opened_menu = use_signal(|| None);
+    use_context_provider(|| MenuBarState { opened_menu });
+
+    rsx! {
+        document::Stylesheet { href: "{MAIN_CSS}" }
+        document::Stylesheet { href: "{HEADER_CLASS}" }
+        div { class: "menu_bar", z_index: 100, position: "relative",
+            for menu in menu_list {
+                {menu.render()}
+            }
+        }
+        if opened_menu().is_some() {
+            div {
+                class: "dropback",
+                z_index: 99,
+                onclick: move |e: Event<MouseData>| {
+                    opened_menu.set(None);
+                },
+            }
+        }
+    }
+}
+
 #[component]
 fn MenuView(
     label: Element,
@@ -68,59 +97,41 @@ fn MenuView(
 ) -> Element {
     const HEADER_CLASS: Asset = asset!("/assets/header.css");
     const MAIN_CSS: Asset = asset!("/assets/main.css");
-
-    let id = crate::gen_id!(5, "menu_");
+    let id = use_memo(|| crate::gen_id!(5, "menu_"));
+    // let id = crate::gen_id!(5, "menu_");
+    // let id_clone = id.clone();
+    // let id_clone_1 = id.clone();
     let mut is_open = use_signal(|| false);
     let mut show_children = use_signal(|| false);
     let menu_list_1 = menu_list.clone();
     let menu_list_2 = menu_list.clone();
-    // let click_handler = move |e: Event<MouseData>| {
-    //     //e.stop_propagation();
-    //     // Check if the menu is opened
-    //     is_open.toggle();
-    // };
-    use_effect(move || {
-        // if is_open() {
-        //     if menu_list_1.is_some() {
-        //         show_children.set(true);
-        //     } else {
-        //         if let Some(action) = &action {
-        //             action.call();
+    let mut opened_menu = use_context::<MenuBarState>().opened_menu;
 
-        //             show_children.set(false);
-        //         }
-        //     }
-        // } else {
-        //     show_children.set(false);
-        // }
+    use_effect(move || {
+        if opened_menu().is_some() && opened_menu() == Some(id()) {
+            is_open.set(true);
+            show_children.set(true);
+        } else {
+            is_open.set(false);
+            show_children.set(false);
+        }
     });
 
     let mut width = use_signal(|| 0.0);
     let mut height = use_signal(|| 0.0);
+    // height.set(elem.as_web_event().get_bounding_client_rect().height());
 
-    /**
-    onclick: move |e: Event<MouseData>| {
-               is_open.toggle();
-               if is_open() {
-                   if menu_list_1.is_some() {
-                       show_children.set(true);
-                   } else {
-                       if let Some(action) = &action {
-                           action.call();
-                           show_children.set(false);
-                       }
-                   }
-               } else {
-                   show_children.set(false);
-               }
-               if level != 0 && menu_list_1.is_some() {
-                   info!("Menu clicked, level: {level}, is_open: {is_open}");
-                   e.stop_propagation();
-                   is_open.toggle();
-                   show_children.set(true);
-               }
-           },
-    */
+    // if level == 0 {
+    //                 div {
+    //                     class: "dropback",
+    //                     z_index: 99,
+    //                     onclick: move |e: Event<MouseData>| {
+    //                         e.stop_propagation();
+    //                         show_children.set(false);
+    //                         is_open.set(false);
+    //                     },
+    //                 }
+    //             }
 
     rsx! {
         document::Stylesheet { href: "{MAIN_CSS}" }
@@ -128,7 +139,18 @@ fn MenuView(
 
         div {
             class: "menu_wrapper",
+            z_index: 100,
             onclick: move |e: Event<MouseData>| {
+                if is_open() {
+                    if level != 0 && menu_list_1.is_some() {
+                        opened_menu.set(Some(id()));
+                        return;
+                    } else {
+                        opened_menu.set(None);
+                    }
+                } else {
+                    opened_menu.set(Some(id()));
+                }
                 is_open.toggle();
                 if is_open() {
                     if menu_list_1.is_some() {
@@ -137,13 +159,13 @@ fn MenuView(
                         if let Some(action) = &action {
                             action.call();
                             show_children.set(false);
+                            opened_menu.set(None);
                         }
                     }
                 } else {
                     show_children.set(false);
                 }
                 if level != 0 && menu_list_1.is_some() {
-                    info!("Menu clicked, level: {level}, is_open: {is_open}");
                     e.prevent_default();
                     is_open.toggle();
                     show_children.set(true);
@@ -161,8 +183,8 @@ fn MenuView(
             },
             div {
                 class: "menu center",
-                id: "{id}",
-                z_index: 100 - level,
+                id: "{id()}",
+                z_index: 100,
                 onmounted: move |elem: Event<MountedData>| async move {
                     use dioxus_web::WebEventExt;
                     width.set(elem.as_web_event().get_bounding_client_rect().width());
@@ -178,18 +200,6 @@ fn MenuView(
                     width: width(),
                     height: height(),
                 }
-                if level == 0 {
-
-                    div {
-                        class: "dropback",
-                        z_index: 100 - level - 1,
-                        onclick: move |e: Event<MouseData>| {
-                            e.stop_propagation();
-                            show_children.set(false);
-                            is_open.set(false);
-                        },
-                    }
-                }
             }
         }
     }
@@ -198,11 +208,13 @@ fn MenuView(
 #[component]
 fn MenuListView(show: Signal<bool>, menu_list: Vec<Menu>, width: f64, height: f64) -> Element {
     let level = menu_list.first().map(|m| m.level).unwrap_or_default();
+    let h = height + 40.0;
     rsx! {
         div {
-            z_index: 100 + level,
+            class: "menu_list_view",
+            z_index: 100,
             position: "absolute",
-            top: if level == 1 { "{height}px" } else { "0" },
+            top: if level == 1 { "{h}px" } else { "0" },
             left: if level > 1 { "{width}px" } else { "0" },
             for menu in menu_list {
                 {menu.render()}

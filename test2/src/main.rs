@@ -1,3 +1,5 @@
+use std::vec;
+
 use components::Navbar;
 use dioxus::{logger::tracing::info, prelude::*};
 use dioxus_elements::h1;
@@ -132,6 +134,16 @@ fn Nav() -> Element {
         sam_util::Menu::new(rsx!("slideshow 3"), 0).action(|| info!("3 util clicked")),
     ]);
 
+    let menu_from_util2 = sam_util::Menu::new(rsx!("slideshow"), 0).children(vec![
+        sam_util::Menu::new(rsx!("slideshow 1"), 1).children(vec![
+            sam_util::Menu::new(rsx!("slideshow ***********"), 2).action(|| info!("*******")),
+            sam_util::Menu::new(rsx!("slideshow --------"), 2).action(|| info!("----")),
+            sam_util::Menu::new(rsx!("slideshow ++++++"), 2).action(|| info!("+++++")),
+        ]),
+        sam_util::Menu::new(rsx!("slideshow 2"), 0).action(|| info!("2 util clicked")),
+        sam_util::Menu::new(rsx!("slideshow 3"), 0).action(|| info!("3 util clicked")),
+    ]);
+
     // if IS_MOBILE() {
 
     //     sam_ui::header::MenuList { menu_list: menu_bar() }
@@ -139,8 +151,9 @@ fn Nav() -> Element {
 
     //     sam_ui::header::MenuBar { menu_list: menu_bar() }
     // }
+    // {menu_from_util.render()}
     rsx! {
-        {menu_from_util.render()}
+        sam_util::MenuBar { menu_list: vec![menu_from_util, menu_from_util2] }
         // Global app resources
         Outlet::<Route> {}
         div { "footer" }
