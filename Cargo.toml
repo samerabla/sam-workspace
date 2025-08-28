@@ -2,7 +2,7 @@
 members = [ "sam_ui", "sam_util", "testo", "test2", "db", "auth", "axum_test", 
     "sam_proc_macros", "learning", "sam_error", "ssr_test", "sam_frontend", "demo", 
     "demo_frontend", "base/backend", 'base\frontend', "base/run_frontend"
-, "sam_icon", "base/shared", "test_backend"]
+, "sam_icon", "base/shared", "test_backend", 'examples\menu_example']
 resolver = "2"
 
 [workspace.dependencies]

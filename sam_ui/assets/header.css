@@ -1,24 +1,47 @@
-.menu_bar {
+.menu {
+    position: relative;
     display: flex;
-    background-color: black;
-    color: white;
+    z-index: 100;
 }
 
-.menu_wrapper {
+.menu_item_wrapper {
     position: relative;
     cursor:pointer;
     height: 100%;
+    z-index: 100;
 }
 
-.menu {
+.menu_item {
     position: relative;
     height: 100%;
-    background: green;
-    padding: 20px;
+    padding: 14px;
+    z-index: 100;
+    background-color: #ddd;
+    user-select: none;
 }
 
-.menu:hover {
-    background: rgb(183, 17, 194);
+.menu_item:hover {
+    background-color: #ccc;
+}
+
+.menu_item_space {
+    flex:1;
+}
+
+.trigger {
+    transform: translateY(-2px);
+    text-wrap-mode: nowrap;
+}
+
+.has_children_icon {
+    margin-inline-start: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu_item_list {
+    width: max-content;
 }
 
 .sub_menu_wrapper {
@@ -45,7 +68,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    /* background: peru; */
+    z-index: 99;
 }
 
 .sub_sub_menu_wrapper {

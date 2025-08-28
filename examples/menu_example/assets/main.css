@@ -1,0 +1,16 @@
+.custom_class {
+    background-color: #ddd;
+}
+
+.custom_class .home {
+    display: flex;
+    align-items: center;
+}
+
+.custom_class .menu_item[level="0"]:hover {
+    background-color: #e01313  !important;
+}
+
+.custom_class .menu_item[level="1"]:hover {
+    background-color: #0b45b0  !important;
+}

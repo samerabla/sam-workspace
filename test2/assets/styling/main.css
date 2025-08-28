@@ -6,6 +6,16 @@ body {
     margin: 20px;
 }
 
+.tahsin {
+  background-color: red;
+  
+}
+
+.tahsin .menu_list_view {
+  border: 1px solid #eee;
+  background-color:white;
+}
+
 #hero {
     margin: 0;
     display: flex;

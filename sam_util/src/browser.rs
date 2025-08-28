@@ -22,3 +22,35 @@ pub fn remove_session_storage(key: &str) {
         }
     }
 }
+
+fn set_direction(dir: &str) {
+    if let Some(document) = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.document_element())
+    {
+        let _ = document.set_attribute("dir", dir);
+    }
+}
+
+pub fn to_rtl() {
+    set_direction("rtl");
+}
+
+pub fn to_ltr() {
+    set_direction("ltr");
+}
+
+pub fn is_rtl() -> bool {
+    let document = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.document_element());
+
+    if let Some(element) = document {
+        let dir = element
+            .get_attribute("dir")
+            .unwrap_or_else(|| "ltr".to_string());
+        dir.to_lowercase() == "rtl"
+    } else {
+        false
+    }
+}

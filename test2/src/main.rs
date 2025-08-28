@@ -11,7 +11,7 @@ use components::*;
 mod views;
 
 use dioxus_sdk::utils::window::use_window_size;
-use sam_ui::animation::*;
+use sam_ui::{animation::*, Menu, MenuItem};
 
 pub static IS_MOBILE: GlobalSignal<bool> = Signal::global(|| Device::is_mobile()());
 #[derive(Debug, Clone)]
@@ -67,93 +67,101 @@ fn App() -> Element {
 
 #[component]
 fn Nav() -> Element {
-    use sam_ui::header::*;
-
     // push
     let nav = use_navigator();
 
-    let fer = Menu::new("ferial").action(move || {
-        nav.push(Route::Blog { id: 25 });
-    });
-    let samo = Menu::new("samo")
-        .action(move || {
-            nav.push(Route::Blog { id: 66 });
-        })
-        .children(vec![fer]);
-    let nest = Menu::new("nest").children(vec![samo]);
-    let go = Menu::new("last go").children(vec![nest]);
-    let sub_sub_menu = Menu::new("go father").children(vec![go]);
-    let sub_sub_menu2 = Menu::new("Testoo").action(|| info!("2 clicked"));
-    let sub_sub_menu3 = Menu::new("sub_sub_menu").action(|| info!("3 clicked"));
-    let sub_menu_1 = Menu::new("Tahsinkof go runoooooo")
-        // .action(|| info!("action goes here...."))
-        .children(vec![sub_sub_menu, sub_sub_menu2, sub_sub_menu3]);
-
-    let sub_sub_menu21 = Menu::new("11").action(|| info!("11 clicked"));
-    let sub_sub_menu22 = Menu::new("12").action(|| info!("12 clicked"));
-    let sub_sub_menu23 = Menu::new("13").action(|| info!("13 clicked"));
-    let sub_menu_2 = Menu::new("sub_menu_1")
-        // .action(|| info!("action goes here...."))
-        .children(vec![sub_sub_menu21, sub_sub_menu22, sub_sub_menu23]);
-
-    let menu1 = Menu::new("Test")
-        .children(vec![sub_menu_1, sub_menu_2])
-        .to_root();
-
-    let sub_menu_4 = Menu::new("a").action(|| info!("pritoooo clicked"));
-    let sub_menu_3 = Menu::new("x");
-    //let menu2 = Menu::new("print").children(vec![sub_menu_4, sub_menu_3]);
-    let menu2 = Menu::new("slideshow")
-        .action(move || {
-            nav.push(Route::Test {});
-        })
-        .to_root();
-    let menu3 = Menu::new("Home")
-        .action(move || {
-            nav.push(Route::Home {});
-        })
-        .to_root();
-    let menu4 = Menu::new("not")
-        .action(move || {
-            nav.push(Route::PageNotFound {
-                route: vec!["vvv".to_string()],
-            });
-        })
-        .to_root();
-
-    let mut menu_bar = use_signal(|| vec![menu3, menu1, menu2, menu4]);
     let mut is_mobile = use_signal(|| false);
 
-    let menu_from_util = sam_util::Menu::new(rsx!("slideshow"), 0).children(vec![
-        sam_util::Menu::new(rsx!("slideshow 1"), 1).children(vec![
-            sam_util::Menu::new(rsx!("slideshow ***********"), 2).action(|| info!("*******")),
-            sam_util::Menu::new(rsx!("slideshow --------"), 2).action(|| info!("----")),
-            sam_util::Menu::new(rsx!("slideshow ++++++"), 2).action(|| info!("+++++")),
-        ]),
-        sam_util::Menu::new(rsx!("slideshow 2"), 0).action(|| info!("2 util clicked")),
-        sam_util::Menu::new(rsx!("slideshow 3"), 0).action(|| info!("3 util clicked")),
-    ]);
+    // sam_util::to_rtl();
 
-    let menu_from_util2 = sam_util::Menu::new(rsx!("slideshow"), 0).children(vec![
-        sam_util::Menu::new(rsx!("slideshow 1"), 1).children(vec![
-            sam_util::Menu::new(rsx!("slideshow ***********"), 2).action(|| info!("*******")),
-            sam_util::Menu::new(rsx!("slideshow --------"), 2).action(|| info!("----")),
-            sam_util::Menu::new(rsx!("slideshow ++++++"), 2).action(|| info!("+++++")),
-        ]),
-        sam_util::Menu::new(rsx!("slideshow 2"), 0).action(|| info!("2 util clicked")),
-        sam_util::Menu::new(rsx!("slideshow 3"), 0).action(|| info!("3 util clicked")),
-    ]);
-
-    // if IS_MOBILE() {
-
-    //     sam_ui::header::MenuList { menu_list: menu_bar() }
-    // } else {
-
-    //     sam_ui::header::MenuBar { menu_list: menu_bar() }
-    // }
-    // {menu_from_util.render()}
     rsx! {
-        sam_util::MenuBar { menu_list: vec![menu_from_util, menu_from_util2] }
+        div {
+            Menu { update_class: "tahsin",
+                MenuItem {
+                    trigger: rsx! {
+                        div { "Test Width" }
+                    },
+                    MenuItem {
+                        trigger: rsx! {
+                            div { style: "width:500px;height:400px;background:black;color:white;",
+                                p { onclick: move |_| info!("from P"), "some thing here" }
+                                p { "some thing here" }
+                                p { "some thing here" }
+                            }
+                        },
+
+                    }
+                }
+                MenuItem { trigger: rsx! { "edit" },
+                    MenuItem { trigger: rsx! { "open" },
+                        MenuItem { trigger: rsx! { "xxx" },
+                            MenuItem {
+                                trigger: rsx! { "yyyy" },
+                                action: Callback::new(|_| info!("yyyy")),
+
+                            }
+
+                        }
+                        MenuItem { trigger: rsx! { "hhhh" },
+                            MenuItem {
+                                trigger: rsx! { "uuuuuu" },
+                                action: Callback::new(|_| info!("uuuuuu")),
+
+                            }
+
+                        }
+
+                    }
+                    MenuItem { trigger: rsx! { "some menu" },
+                        MenuItem { trigger: rsx! { "xxx" },
+                            MenuItem {
+                                trigger: rsx! { "yyyy" },
+                                action: Callback::new(|_| info!("yyyy")),
+
+                            }
+
+                        }
+                        MenuItem { trigger: rsx! { "hhhh" },
+                            MenuItem {
+                                trigger: rsx! { "uuuuuu" },
+                                action: Callback::new(|_| info!("uuuuuu")),
+
+                            }
+
+                        }
+
+                    }
+
+                    hr { style: "background:#ddd" }
+                    MenuItem { trigger: rsx! { "Another Menu for something" },
+                        MenuItem { trigger: rsx! { "xxx" },
+                            MenuItem {
+                                trigger: rsx! { "yyyy" },
+                                action: Callback::new(|_| info!("yyyy")),
+
+                            }
+
+                        }
+                        MenuItem { trigger: rsx! { "hhhh" },
+                            MenuItem {
+                                trigger: rsx! { "uuuuuu" },
+                                action: Callback::new(|_| info!("uuuuuu")),
+
+                            }
+
+                        }
+
+                    }
+
+                    MenuItem {
+                        trigger: rsx! { "Samoora" },
+                        action: Callback::new(|_| info!("Samoora")),
+
+                    }
+                    MenuItem { trigger: rsx! { "Abla" } }
+                }
+            }
+        }
         // Global app resources
         Outlet::<Route> {}
         div { "footer" }

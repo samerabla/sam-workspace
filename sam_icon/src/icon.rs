@@ -30,26 +30,30 @@
 /// By default Lucide icons will be used
 ///
 /// ```
-/// The order of params: [name size color bg]
+/// The order of params: [name size color bg color_hover bg_hover action]
 /// color=stroke | bg=fill
 ///
-/// [Defaults:]
+/// # Defaults
 /// size: 30
 /// color: "black"
 /// fill: "white"
 ///
-/// You can provide onyly name
+/// Example with only name
 /// icon!(LdX)
 ///
-/// You can provide name, size
+/// Example with name, size
 /// icon!(LdX,60)
 ///
-/// You can provide name, size, color
+/// Example with name, size, color
 /// icon!(LdX,40,"red")
 ///
-/// You can provide name, size, color, bg
+/// Example with name, size, color, bg
 /// icon!(LdX,60,"white","black")
 ///
+/// Example with name, size, color, bg, color_hover, bg_hover
+/// icon!(LdX,60,"white","black","white","black")
+///
+/// Example with action:
 /// rsx! {
 ///         div {
 ///                 {
@@ -135,8 +139,8 @@ macro_rules! icon {
         $size:expr,
         $color:expr,
         $bg:expr,
-        $hover_color:expr,
-        $hover_bg:expr,
+        $color_hover:expr,
+        $bg_hover:expr,
     ) => {{
         use dioxus::prelude::*;
         use $crate::Icon;
@@ -146,8 +150,8 @@ macro_rules! icon {
         rsx! {
             div {
                 onmouseover: move |_| {
-                    color.set($hover_color);
-                    bg.set($hover_bg);
+                    color.set($color_hover);
+                    bg.set($bg_hover);
                 },
                 onmouseout: move |_| {
                     color.set($color);
@@ -168,8 +172,8 @@ macro_rules! icon {
         $size:expr,
         $color:expr,
         $bg:expr,
-        $hover_color:expr,
-        $hover_bg:expr,
+        $color_hover:expr,
+        $bg_hover:expr,
         onclick: $onclick:ident
     ) => {{
         use dioxus::prelude::*;
@@ -183,8 +187,8 @@ macro_rules! icon {
                     $onclick(e);
                 },
                 onmouseover: move |_| {
-                    color.set($hover_color);
-                    bg.set($hover_bg);
+                    color.set($color_hover);
+                    bg.set($bg_hover);
                 },
                 onmouseout: move |_| {
                     color.set($color);
