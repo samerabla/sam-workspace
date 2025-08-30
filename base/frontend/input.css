@@ -133,3 +133,20 @@
 @utility input-square {
   @apply rounded-lg;
 } */
+
+.dropdown_menu {
+  .menu_item[level="1"] {
+    @apply bg-primary-500 text-white;
+    &:hover {
+      @apply bg-primary-300
+    }
+  }
+
+  .menu_item[level="0"] {
+    @apply bg-white;
+  }
+
+  .menu_item_list {
+    @apply border border-primary-500 p-1;
+  }
+}

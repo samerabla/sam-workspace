@@ -15,22 +15,37 @@ pub(crate) struct MenuState {
 }
 
 #[component]
-pub fn Menu(children: Element, update_class: Option<String>) -> Element {
+pub fn Menu(children: Element, custom_class: Option<String>) -> Element {
     const HEADER_CLASS: Asset = asset!("/assets/header.css");
     const MAIN_CSS: Asset = asset!("/assets/main.css");
     let mut opened_menu = use_signal(|| None);
+    let mut z_index = use_signal(|| 0);
     use_context_provider(|| MenuState { opened_menu });
     use_context_provider(|| 0 as u8);
-    let u_class = update_class.unwrap_or_default();
+    let u_class = custom_class.unwrap_or_default();
     let menu_class = format!("menu {u_class}").trim().to_string();
+
+    use_effect(move || {
+        if opened_menu().is_none() {
+            z_index.set(0)
+        }
+    });
     rsx! {
         document::Stylesheet { href: "{MAIN_CSS}" }
         document::Stylesheet { href: "{HEADER_CLASS}" }
-        div { class: "{menu_class}", {children} }
+        div {
+            z_index: z_index(),
+            class: "{menu_class}",
+            onclick: move |_| {
+                z_index.set(999);
+            },
+            {children}
+        }
         if opened_menu().is_some() {
             div {
                 class: "dropback",
-                onclick: move |e: Event<MouseData>| {
+                z_index: z_index() - 1,
+                onclick: move |_| {
                     opened_menu.set(None);
                 },
             }
@@ -66,10 +81,7 @@ pub fn MenuItem(props: MenuItemProps) -> Element {
 
     let mut is_rtl = use_signal(move || sam_util::is_rtl());
 
-    let children_clone = props.children.clone();
-    let children_2 = props.children.clone();
-    let children_3 = props.children.clone();
-    let children_4 = props.children.clone();
+    let has_children = props.children.is_some();
 
     let mut set_position = move || {
         // When onmounted fires, the element might not have its final computed styles yet,
@@ -85,7 +97,6 @@ pub fn MenuItem(props: MenuItemProps) -> Element {
 
     let onclick = move |e: Event<MouseData>| {
         set_position();
-        let has_children = children_clone.is_some();
         let is_submenu = level > 0;
 
         // Handle submenu behavior
@@ -122,13 +133,13 @@ pub fn MenuItem(props: MenuItemProps) -> Element {
             is_open.set(true);
             show_children.set(true);
         }
-        if level > 0 && children_2.is_some() {
+        if level > 0 && has_children {
             show_children.set(true);
         }
     };
 
     let onmouseleave = move |_: Event<MouseData>| {
-        if level > 0 && children_3.is_some() {
+        if level > 0 && has_children {
             show_children.set(false);
         }
     };
@@ -143,7 +154,7 @@ pub fn MenuItem(props: MenuItemProps) -> Element {
             div { class: "menu_item center", id: "{id()}", "level": "{level}",
                 div { class: "trigger", {props.trigger} }
                 div { class: "menu_item_space" }
-                if level > 0 && children_4.is_some() {
+                if level > 0 && has_children {
                     div { class: "has_children_icon",
                         {if is_rtl() { icon!(LdChevronLeft, 15) } else { icon!(LdChevronRight, 15) }}
                     }
@@ -185,8 +196,8 @@ fn MenuItemList(
     };
     rsx! {
         div {
-            class: "menu_item_list",
-            z_index: 100,
+            class: "menu_item_list sam-shadow",
+            z_index: 101,
             position: "absolute",
             top: if level == 1 { "{h}px" } else { "0" },
             left: if level > 1 && !is_rtl() { "{width}px" } else if level <= 1 { "0" } else { "auto" },

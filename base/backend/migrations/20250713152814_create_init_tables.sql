@@ -48,7 +48,8 @@ create table errors (
 );
 
 CREATE TABLE languages (
-    id TEXT PRIMARY KEY,
+    id Serial PRIMARY KEY,
+    code TEXT Not Null UNIQUE,
     name TEXT NOT NULL UNIQUE,
     flag TEXT NOT NULL,
     active BOOLEAN NOT NULL
@@ -64,7 +65,7 @@ CREATE TABLE categories (
 CREATE TABLE categories_names (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
-    language_id TEXT NOT NULL REFERENCES languages(id),
+    language_id INTEGER  NOT NULL REFERENCES languages(id),
     category_id TEXT NOT NULL REFERENCES categories(id),
     slug TEXT NOT NULL UNIQUE,
     UNIQUE(language_id, category_id), -- One name per language per category
@@ -99,7 +100,7 @@ CREATE TABLE fields_names (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT NOT NULL,
     placeholder TEXT,
-    language_id TEXT NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+    language_id INTEGER  NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
     field_id TEXT NOT NULL REFERENCES fields(id) ON DELETE CASCADE,
     UNIQUE(language_id, field_id)
 );
@@ -116,7 +117,7 @@ CREATE TABLE field_options (
 CREATE TABLE field_options_names (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     option_id INTEGER NOT NULL REFERENCES field_options(id) ON DELETE CASCADE,
-    language_id TEXT NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+    language_id INTEGER  NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     UNIQUE(option_id, language_id)
 );

@@ -18,14 +18,14 @@ impl Category {
 pub struct CategoryName {
     pub id: Option<i32>,
     pub name: String,
-    pub language_id: String,
+    pub language_id: i32,
     pub category_id: String,
     pub slug: String,
     // pub updated_at: time::OffsetDateTime,
 }
 
 impl CategoryName {
-    pub fn new(name: String, language_id: String, category_id: String, slug: String) -> Self {
+    pub fn new(name: String, language_id: i32, category_id: String, slug: String) -> Self {
         Self {
             id: None,
             name,
@@ -44,7 +44,8 @@ pub struct CategoryWithNames {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Language {
-    pub id: String,
+    pub id: i32,
+    pub code: String,
     pub name: String,
     pub flag: String,
     pub active: bool,

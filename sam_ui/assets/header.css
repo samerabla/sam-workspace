@@ -1,21 +1,21 @@
 .menu {
     position: relative;
     display: flex;
-    z-index: 100;
+    z-index: 0;
 }
 
 .menu_item_wrapper {
     position: relative;
     cursor:pointer;
     height: 100%;
-    z-index: 100;
+    z-index: 0;
 }
 
 .menu_item {
     position: relative;
     height: 100%;
     padding: 14px;
-    z-index: 100;
+    z-index: 0;
     background-color: #ddd;
     user-select: none;
 }
@@ -68,7 +68,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 99;
+    z-index: 0;
 }
 
 .sub_sub_menu_wrapper {

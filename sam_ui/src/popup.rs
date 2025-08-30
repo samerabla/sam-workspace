@@ -6,9 +6,9 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::js_sys::Array;
 
 const DEFAULT_BACKDROP_CLASS: &str =
-    "fixed inset-0 bg-white opacity-20 flex items-center justify-center z-50";
+    "fixed inset-0 bg-white opacity-20 flex items-center justify-center z-[1000]";
 const DEFAULT_POPUP_CLASS: &str =
-    "absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-white p-6 rounded-lg sam-shadow w-max min-w-[300px] max-w-[90%] z-51";
+    "absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-white p-6 rounded-lg sam-shadow w-max min-w-[300px] max-w-[90%] z-[1001]";
 
 #[derive(Debug, PartialEq, Clone, Props)]
 pub struct PopupProps {
@@ -44,7 +44,7 @@ pub enum PopupState {
 
 pub fn Popup(mut props: PopupProps) -> Element {
     let mut target = use_signal(|| None);
-    let id = use_memo(move || sam_util::gen_id!());
+    let id = use_memo(move || sam_util::gen_id!(5, "popup_"));
 
     let backdrop_class = props.replace_backdrop_class.unwrap_or(format!(
         "{DEFAULT_BACKDROP_CLASS} {}",
@@ -76,13 +76,17 @@ pub fn Popup(mut props: PopupProps) -> Element {
     }
 
     rsx!(
-        div { id: id(),
+        div { id: id(), class: "w-max max-w-f",
             if props.has_backdrop {
                 div {
                     class: "{backdrop_class}",
                     onclick: move |_| {
                         if props.close_on_bg_click {
-                            props.state.set(PopupState::CloseWithAnimation);
+                            let mut state = PopupState::Close;
+                            if !leave_anim_class.is_empty() {
+                                state = PopupState::CloseWithAnimation;
+                            }
+                            props.state.set(state);
                         }
                     },
                 }
@@ -116,7 +120,7 @@ pub struct MsgConfig {
     pub message: String,
     pub ty: MsgType,
 
-    /// Callback to be executed on clicking ok button in a confiem msg
+    /// Callback to be executed on clicking ok button in a confirm msg
     pub callback: Option<Callback<()>>,
 
     /// Alternative text for ok button

@@ -23,6 +23,12 @@ impl Elem {
             elem.class_list().remove(&arr).ok();
         }
     }
+
+    pub fn focus(self) {
+        if let Some(el) = self.to_html_elem() {
+            let _ = el.focus();
+        }
+    }
 }
 
 /// Implement conversion from `&str` (CSS selector)

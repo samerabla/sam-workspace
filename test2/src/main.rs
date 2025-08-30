@@ -76,7 +76,7 @@ fn Nav() -> Element {
 
     rsx! {
         div {
-            Menu { update_class: "tahsin",
+            Menu { custom_class: "tahsin",
                 MenuItem {
                     trigger: rsx! {
                         div { "Test Width" }

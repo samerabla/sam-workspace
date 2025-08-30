@@ -17,14 +17,14 @@ pub async fn list_languages(pool: &PgPool) -> Result<Vec<Language>> {
 }
 
 #[catch_error]
-pub async fn get_language(pool: &PgPool, language_id: String) -> Result<Language> {
+pub async fn get_language(pool: &PgPool, language_code: String) -> Result<Language> {
     let language: Language = query_as!(
         Language,
         r#"
         SELECT * FROM languages 
-        WHERE id = $1
+        WHERE code = $1
         "#,
-        language_id,
+        language_code
     )
     .fetch_one(pool)
     .await?;
@@ -35,10 +35,10 @@ pub async fn get_language(pool: &PgPool, language_id: String) -> Result<Language
 pub async fn add_language(pool: &PgPool, language: Language) -> Result<()> {
     query!(
         r#"
-        INSERT INTO languages (id,name,flag,active)
+        INSERT INTO languages (code,name,flag,active)
         VALUES ($1, $2, $3, $4) 
         "#,
-        language.id,
+        language.code,
         language.name,
         language.flag,
         language.active
@@ -54,15 +54,17 @@ pub async fn update_language(pool: &PgPool, language: Language) -> Result<()> {
         r#"
         UPDATE languages
         SET
+            code = $1,
             name = $2,
             flag = $3,
             active = $4
-        WHERE id = $1
+        WHERE id = $5
         "#,
-        language.id,
+        language.code,
         language.name,
         language.flag,
-        language.active
+        language.active,
+        language.id
     )
     .execute(pool)
     .await?;
@@ -70,7 +72,7 @@ pub async fn update_language(pool: &PgPool, language: Language) -> Result<()> {
 }
 
 #[catch_error]
-pub async fn delete_language(pool: &PgPool, language_id: String) -> Result<()> {
+pub async fn delete_language(pool: &PgPool, language_id: i32) -> Result<()> {
     query!(
         r#"
         DELETE FROM languages 

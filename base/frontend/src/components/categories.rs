@@ -63,7 +63,7 @@ pub fn CategoryForm(props: CategoryFormProps) -> Element {
             for name in edited_names {
                 names_map.insert(name.language_id.clone(), name.clone());
             }
-            names.set(names_map);
+            //names.set(names_map);
         }
     });
 
@@ -189,38 +189,7 @@ pub fn CategoryForm(props: CategoryFormProps) -> Element {
                     }
                 }
             }
-            {
-                match &*languages.read_unchecked() {
-                    Some(langs) => rsx! {
-                        div { class: "flex flex-col gap-4",
-                            for lang in langs.clone() {
-                                div { class: "p-5 w-[400px]",
-                                    Input {
-                                        name: "{lang.id}",
-                                        appearance: InputAppearance::square,
-                                        label: "{lang.name}",
-                                        value: names.read_unchecked().get(&lang.id).map_or(String::new(), |n| n.name.clone()),
-                                        oninput: move |evt: FormEvent| {
-                                            let name = evt.value();
-                                            let slug = format!("{}-{}", lang.id.clone(), category_id());
-                                            let category_name = CategoryName::new(
-                                                name,
-                                                lang.id.clone(),
-                                                category_id(),
-                                                slug,
-                                            );
-                                            names.write_unchecked().insert(lang.id.clone(), category_name);
-                                        },
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    None => rsx! {
-                        div { "Loading languages..." }
-                    },
-                }
-            }
+            h1 { "add the commented below here and adjustment it" }
             button {
                 class: if is_edit { "btn btn-warning" } else { "btn btn-primary" },
                 onclick: send_request,
@@ -247,3 +216,36 @@ pub fn CategoryForm(props: CategoryFormProps) -> Element {
         Spinner { state: spinner_state }
     }
 }
+
+// {
+//                 match &*languages.read_unchecked() {
+//                     Some(langs) => rsx! {
+//                         div { class: "flex flex-col gap-4",
+//                             for lang in langs.clone() {
+//                                 div { class: "p-5 w-[400px]",
+//                                     Input {
+//                                         name: "{lang.id}",
+//                                         appearance: InputAppearance::square,
+//                                         label: "{lang.name}",
+//                                         value: names.read_unchecked().get(&lang.id).map_or(1, |n| n.name.clone()),
+//                                         oninput: move |evt: FormEvent| {
+//                                             let name = evt.value();
+//                                             let slug = format!("{}-{}", lang.code.clone(), category_id());
+//                                             let category_name = CategoryName::new(
+//                                                 name,
+//                                                 lang.id.clone(),
+//                                                 category_id(),
+//                                                 slug,
+//                                             );
+//                                             names.write_unchecked().insert(lang.code.clone(), category_name);
+//                                         },
+//                                     }
+//                                 }
+//                             }
+//                         }
+//                     },
+//                     None => rsx! {
+//                         div { "Loading languages..." }
+//                     },
+//                 }
+//             }

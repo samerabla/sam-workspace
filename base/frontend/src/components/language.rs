@@ -3,20 +3,25 @@ use std::collections::HashMap;
 use dioxus::{logger::tracing::info, prelude::*};
 use sam_ui::{
     input::{Input, InputAppearance},
-    popup::{Msg, MsgConfig, PopupState, Spinner, Toast},
+    popup::{Msg, MsgConfig, Popup, PopupState, Spinner, Toast},
+    Elem, Menu, MenuItem,
 };
 use sam_util::{delete_entity, fetch_data, post_json, put_json};
 use shared::{user::UserResponse, Language};
 
-use sam_ui::header::*;
+use sam_icon::icon;
+use wasm_bindgen::JsCast;
 
 #[component]
 pub fn Languages() -> Element {
-    let mut show_form = use_signal(|| false);
+    let mut show_form = use_signal(|| PopupState::Close);
     let mut edit_language = use_signal(|| None::<Language>);
-    let mut context_menu_open = use_signal(|| None::<String>);
     let mut languages_resource: Signal<Option<Vec<Language>>> = use_signal(|| None);
     let mut err_msg = use_signal(|| MsgConfig::default());
+    let mut success_msg = use_signal(|| MsgConfig::default());
+    let mut deleted_lang_id = use_signal(|| None::<i32>);
+
+    let mut confirm_del_msg = use_signal(|| MsgConfig::default());
 
     // Fetch languages
     let fetch_languages = move || {
@@ -41,61 +46,79 @@ pub fn Languages() -> Element {
         });
     };
 
+    let mut remove_lang_lacally = move |lang_id: i32| {
+        let mut langs = languages_resource().unwrap_or_default();
+        langs.retain(|lang| lang.id != lang_id);
+        languages_resource.set(Some(langs));
+    };
+
+    let mut update_lang_locally = move |lang: Language| {
+        let mut langs = languages_resource().unwrap_or_default();
+        info!("lang {:?}", lang);
+        info!("before langs {:#?}", langs);
+        if let Some(index) = langs.iter().position(|l| l.id == lang.id) {
+            info!("index {:?}", index);
+            langs[index] = lang;
+        } else {
+            langs.push(lang);
+        }
+        info!("after langs {:#?}", langs);
+        languages_resource.set(Some(langs));
+    };
+
     // Load languages on component mount
     use_effect(move || {
         fetch_languages();
     });
 
+    use_effect(move || {
+        deleted_lang_id.with(|id| {
+            let id = id.clone();
+            if let Some(id) = id {
+                confirm_del_msg.set(
+                    MsgConfig::with_confirm("You will delete this language permanently.").callback(
+                        move || {
+                            // handle_delete("id".to_string());
+                            let id = id.clone();
+                            spawn(async move {
+                                let url =
+                                    format!("{}/languages/{}", crate::enviroment::BASE_URL, id);
+                                match delete_entity(&url).await {
+                                    Ok(res) => {
+                                        if res.ok() {
+                                            // Refresh the list by romoving the deleted lang from the vec in the memory.
+                                            // We don't need to refetch the languages from the db.
+                                            remove_lang_lacally(id);
+                                            deleted_lang_id.set(None);
+                                            success_msg.set(MsgConfig::with_success(
+                                                "Lanuage deleted successfullly",
+                                            ));
+                                        } else {
+                                            let user_res: UserResponse = res.json().await.unwrap();
+                                            err_msg.set(MsgConfig::with_err(user_res.message()));
+                                        }
+                                    }
+                                    Err(e) => {
+                                        err_msg.set(MsgConfig::with_err(e.to_string()));
+                                    }
+                                }
+                            });
+                        },
+                    ),
+                );
+            }
+        });
+    });
+
     let handle_add = move |_| {
         edit_language.set(None);
-        show_form.set(true);
+        show_form.set(PopupState::Open);
     };
 
     let mut handle_edit = move |lang: Language| {
         edit_language.set(Some(lang));
-        show_form.set(true);
-        context_menu_open.set(None);
+        show_form.set(PopupState::Open);
     };
-
-    let mut handle_delete = move |lang_id: String| {
-        spawn(async move {
-            let url = format!("{}/languages/{}", crate::enviroment::BASE_URL, lang_id);
-            match delete_entity(&url).await {
-                Ok(res) => {
-                    if res.ok() {
-                        fetch_languages(); // Refresh the list
-                    } else {
-                        let user_res: UserResponse = res.json().await.unwrap();
-                        err_msg.set(MsgConfig::with_err(user_res.message()));
-                    }
-                }
-                Err(e) => {
-                    err_msg.set(MsgConfig::with_err(e.to_string()));
-                }
-            }
-        });
-        context_menu_open.set(None);
-    };
-
-    let mut handle_form_close = move || {
-        show_form.set(false);
-        edit_language.set(None);
-        fetch_languages(); // Refresh the list after form closes
-    };
-
-    let mut toggle_context_menu = move |lang_id: String| {
-        if context_menu_open() == Some(lang_id.clone()) {
-            context_menu_open.set(None);
-        } else {
-            context_menu_open.set(Some(lang_id));
-        }
-    };
-
-    let dropdown_menu_edit = sam_ui::Menu::new("edit");
-    let dropdown_menu_delete = sam_ui::Menu::new("delete");
-    let dropdown_menu = sam_ui::Menu::new("action")
-        .to_root()
-        .children(vec![dropdown_menu_edit, dropdown_menu_delete]);
 
     rsx! {
         div { class: "languages-container p-6",
@@ -117,11 +140,11 @@ pub fn Languages() -> Element {
                         "No languages found. Add your first language!"
                     }
                 } else {
-                    div { class: "overflow-x-auto",
+                    div { class: "",
                         table { class: "table table-bordered w-full",
                             thead {
                                 tr {
-                                    th { class: "text-left p-3", "ID" }
+                                    th { class: "text-left p-3", "Code" }
                                     th { class: "text-left p-3", "Name" }
                                     th { class: "text-left p-3", "Flag" }
                                     th { class: "text-left p-3", "Active" }
@@ -131,7 +154,7 @@ pub fn Languages() -> Element {
                             tbody {
                                 for lang in languages.iter() {
                                     tr { class: "hover:bg-gray-50",
-                                        td { class: "p-3 border-b", "{lang.id}" }
+                                        td { class: "p-3 border-b", "{lang.code}" }
                                         td { class: "p-3 border-b", "{lang.name}" }
                                         td { class: "p-3 border-b", "{lang.flag}" }
                                         td { class: "p-3 border-b",
@@ -142,29 +165,26 @@ pub fn Languages() -> Element {
                                             }
                                         }
                                         td { class: "p-3 border-b text-center relative",
-                                            button { class: "btn btn-ghost btn-sm p-1",
-                                                sam_ui::header::MenuBar { menu_list: vec![dropdown_menu.clone()] }
-                                            }
-                                            // Context menu
-                                            if context_menu_open() == Some(lang.id.clone()) {
-                                                div { class: "absolute right-0 top-8 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-32",
-                                                    div { class: "py-1",
-                                                        button {
-                                                            class: "w-full text-left px-4 py-2 hover:bg-gray-100 text-sm",
-                                                            onclick: {
-                                                                let lang = lang.clone();
-                                                                move |_| handle_edit(lang.clone())
-                                                            },
-                                                            "Edit"
-                                                        }
-                                                        button {
-                                                            class: "w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 text-sm",
-                                                            onclick: {
-                                                                let lang_id = lang.id.clone();
-                                                                move |_| handle_delete(lang_id.clone())
-                                                            },
-                                                            "Delete"
-                                                        }
+                                            Menu { custom_class: "dropdown_menu",
+                                                MenuItem {
+                                                    trigger: rsx! {
+                                                        {icon!(LdEllipsis, 20)}
+                                                    },
+                                                    MenuItem {
+                                                        trigger: rsx! { "edit" },
+                                                        action: {
+                                                            let lang = lang.clone();
+                                                            move |_| handle_edit(lang.clone())
+                                                        },
+                                                    }
+                                                    MenuItem {
+                                                        trigger: rsx! { "delete" },
+                                                        action: {
+                                                            let lang_id = lang.id.clone();
+                                                            move |_| {
+                                                                deleted_lang_id.set(Some(lang_id.clone()));
+                                                            }
+                                                        },
                                                     }
                                                 }
                                             }
@@ -182,23 +202,30 @@ pub fn Languages() -> Element {
                 }
             }
 
-            // Form modal overlay
-            if show_form() {
-                div {
-                    class: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50",
-                    onclick: move |_| handle_form_close(),
-                    div {
-                        class: "bg-white rounded-lg p-6 max-w-md w-full mx-4",
-                        onclick: move |e| e.stop_propagation(),
-                        LanguageForm {
-                            language: edit_language(),
-                            on_close: handle_form_close,
+            {Msg(err_msg())}
+            {Msg(confirm_del_msg())}
+            Popup {
+                state: show_form,
+                enter_anim_class: "animate__animated animate__zoomIn",
+                leave_anim_class: "animate__animated animate__zoomOut",
+                LanguageForm {
+                    language: edit_language(),
+                    on_close: move |lang: Option<Language>| {
+                        show_form.set(PopupState::CloseWithAnimation);
+                        if let Some(lang) = lang {
+                            update_lang_locally(lang);
+                            let msg = if edit_language().is_some() {
+                                "Language updated successfully!"
+                            } else {
+                                "Language added successfully!"
+                            };
+                            success_msg.set(MsgConfig::with_success(msg));
                         }
-                    }
+                        edit_language.set(None);
+                    },
                 }
             }
-
-            {Msg(err_msg())}
+            {Toast(success_msg())}
         }
     }
 }
@@ -206,15 +233,15 @@ pub fn Languages() -> Element {
 #[derive(Clone, Debug, PartialEq, Props)]
 pub struct LanguageFormProps {
     pub language: Option<Language>,
-    pub on_close: EventHandler<()>,
+    pub on_close: EventHandler<Option<Language>>,
 }
 
 #[component]
 pub fn LanguageForm(props: LanguageFormProps) -> Element {
-    let mut msg = use_signal(|| MsgConfig::default());
     let mut err_msg = use_signal(|| MsgConfig::default());
     let mut spinner_state = use_signal(|| PopupState::Close);
-    let mut language_id = use_signal(String::new);
+    let mut language_id = use_signal(|| 0);
+    let mut language_code = use_signal(String::new);
     let mut language_name = use_signal(String::new);
     let mut language_flag = use_signal(String::new);
     let mut language_is_active = use_signal(|| false);
@@ -225,15 +252,35 @@ pub fn LanguageForm(props: LanguageFormProps) -> Element {
     use_effect(move || {
         if let Some(language) = &props.language {
             language_id.set(language.id.clone());
+            language_code.set(language.code.clone());
             language_name.set(language.name.clone());
             language_flag.set(language.flag.clone());
             language_is_active.set(language.active.clone());
         } else {
-            language_id.set(String::new());
+            language_code.set(String::new());
             language_name.set(String::new());
             language_flag.set(String::new());
             language_is_active.set(false);
         }
+    });
+
+    // Focus on the first input field when form opens
+    use_effect(move || {
+        spawn(async move {
+            // Small delay to ensure the DOM is rendered
+            gloo_timers::future::TimeoutFuture::new(100).await;
+
+            Elem::from("input[name='code']").focus();
+            // if let Some(window) = web_sys::window() {
+            //     if let Some(document) = window.document() {
+            //         if let Ok(Some(element)) = document.query_selector("input[name='code']") {
+            //             if let Ok(input_element) = element.dyn_into::<web_sys::HtmlInputElement>() {
+            //                 let _ = input_element.focus();
+            //             }
+            //         }
+            //     }
+            // }
+        });
     });
 
     let handle_submit = move |_| {
@@ -241,40 +288,32 @@ pub fn LanguageForm(props: LanguageFormProps) -> Element {
         spawn(async move {
             let language = Language {
                 id: language_id(),
+                code: language_code(),
                 name: language_name(),
                 flag: language_flag(),
                 active: language_is_active(),
             };
 
+            let url = format!("{}/languages", crate::enviroment::BASE_URL);
             let result = if is_edit {
                 // PUT request for editing
-                let url = format!("{}/languages", crate::enviroment::BASE_URL);
                 put_json(&url, &language).await
             } else {
                 // POST request for adding
-                let url = format!("{}/languages", crate::enviroment::BASE_URL);
                 post_json(&url, &language).await
             };
 
+            spinner_state.set(PopupState::Close);
             match result {
                 Ok(res) => {
-                    spinner_state.set(PopupState::Close);
                     let user_res: UserResponse = res.json().await.unwrap();
                     if res.ok() {
-                        let success_msg = if is_edit {
-                            "Language updated successfully!"
-                        } else {
-                            "Language added successfully!"
-                        };
-                        msg.set(MsgConfig::with_success(success_msg));
-                        // Close form after success
-                        props.on_close.call(());
+                        props.on_close.call(Some(language));
                     } else {
                         err_msg.set(MsgConfig::with_err(user_res.message()));
                     }
                 }
                 Err(e) => {
-                    spinner_state.set(PopupState::Close);
                     err_msg.set(MsgConfig::with_err(e.to_string()));
                 }
             }
@@ -294,26 +333,19 @@ pub fn LanguageForm(props: LanguageFormProps) -> Element {
     };
 
     rsx! {
-        div { class: "language-form",
-            div { class: "flex justify-between items-center mb-4",
+        div { class: "language-form m-2.5",
+            div { class: "flex justify-between items-center",
                 h2 { class: "text-xl font-bold", "{form_title}" }
-                button {
-                    class: "btn btn-ghost btn-sm",
-                    onclick: move |_| props.on_close.call(()),
-                    "✕"
-                }
             }
-            div { class: "flex flex-col gap-4",
+            div { class: "flex flex-col gap-11 mt-16",
                 Input {
-                    name: "id",
+                    name: "code",
                     appearance: InputAppearance::square,
-                    label: "Language ID",
-                    value: language_id(),
-                    disabled: is_edit, // Disable ID field in edit mode
+                    label: "Language Code",
+                    value: language_code(),
                     oninput: move |evt: FormEvent| {
-                        if !is_edit {
-                            language_id.set(evt.value());
-                        }
+                        info!("code: {}", evt.value());
+                        language_code.set(evt.value());
                     },
                 }
                 Input {
@@ -337,17 +369,12 @@ pub fn LanguageForm(props: LanguageFormProps) -> Element {
             }
             div { class: "flex justify-end gap-2 mt-6",
                 button {
-                    class: "btn btn-ghost",
-                    onclick: move |_| props.on_close.call(()),
+                    class: "btn-sec",
+                    onclick: move |_| props.on_close.call(None),
                     "Cancel"
                 }
-                button {
-                    class: if is_edit { "btn btn-warning" } else { "btn btn-primary" },
-                    onclick: handle_submit,
-                    "{button_text}"
-                }
+                button { class: "btn", onclick: handle_submit, "{button_text}" }
             }
-            {Toast(msg())}
             {Msg(err_msg())}
             Spinner { state: spinner_state }
         }

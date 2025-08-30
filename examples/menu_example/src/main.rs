@@ -81,12 +81,12 @@ fn Navbar() -> Element {
     });
 
     // Custom Style:
-    // We can style the menu by adding a class to update_class property and inside it we can access all related classes
+    // We can style the menu by adding a class to custom_class property and inside it we can access all related classes
     // like menu and menu_wrapper and menu_item and so on.
 
     rsx! {
         div {
-            Menu { update_class: "custom_class",
+            Menu { custom_class: "custom_class",
                 MenuItem {
                     trigger: rsx! {
                         div { class: "home",

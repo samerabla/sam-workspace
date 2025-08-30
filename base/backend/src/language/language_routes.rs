@@ -60,7 +60,7 @@ async fn update_language_handler(
 
 async fn delete_language_handler(
     State(state): State<AppState>,
-    Path(id): Path<String>,
+    Path(id): Path<i32>,
 ) -> Result<Response> {
     delete_language(&state.pool, id).await?;
     let res = UserResponse::with_success("Language Deleted Successfully").into_response();

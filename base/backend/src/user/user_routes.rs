@@ -177,7 +177,7 @@ async fn login_user_handler(
 
     // Create jwt from id then store it in a cookie
     // Token expiration in seconds
-    let seconds = 60 * 60;
+    let seconds = 60 * 60 * 24 * 7; // TODO: change this in production mode to be shorter
     let duration = seconds as usize;
     let token = create_jwt(&user_id.to_string(), duration)?;
     let cookie = create_cookie("token".to_string(), token, seconds);
